@@ -1,0 +1,797 @@
+---
+title: "DEG-analysis"
+author: "unawaz1996"
+date: "2023-03-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    autodep = TRUE,
+	echo = TRUE,
+	warning = FALSE,
+	message = FALSE
+)
+```
+
+## Introduction
+
+
+```{r load}
+source("code/plots.R") 
+source("code/functions.R")
+source("code/libraries.R")
+```
+
+```{r}
+
+# Quality control of genes 
+salmon.files = ("/home/neuro/Documents/NMD_analysis/Analysis/Results/Quantification/Salmon")
+md.files = "data/LTK_Sample Metafile_V3.txt"
+
+# Loading data
+txdf = transcripts(EnsDb.Mmusculus.v79, return.type="DataFrame")
+tx2gene = as.data.frame(txdf[,c("tx_id","gene_id")])
+
+salmon = list.files(salmon.files, pattern = "transcripts$", full.names = TRUE)
+all_files = file.path(salmon, "quant.sf")
+names(all_files) <- paste(c(212:229))
+
+txi_genes <- tximport(all_files, type="salmon", txOut=FALSE,
+                      countsFromAbundance="scaledTPM", tx2gene = tx2gene, ignoreTxVersion = TRUE, ignoreAfterBar = TRUE)
+
+
+md = read.table(md.files, header= TRUE) %>%  mutate(files = file.path(salmon, "quant.sf"))
+md$Group = factor(md$Group)
+```
+
+
+# QC analysis 
+
+## Detection of gene expression 
+
+```{r, fig.height = 4}
+group.labs <- c("Control", "UPF3A KD", "UPF3A OE", "UPF3B KD", "Double KD", "UPF3A OE, UPF3B KD")
+names(group.labs) <- unique(md$Group)
+
+# upf3a
+txi_genes$abundance["ENSMUSG00000038398",] %>% melt() %>% 
+    rownames_to_column("sample") %>% cbind(md) %>% 
+    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
+    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
+    facet_grid(~Group, labeller = labeller(Group = group.labs) ) + ylab("tpm") + theme_bw() + xlab("") + 
+    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170"),
+                       labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", 
+                                  "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+                                  "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
+    theme(legend.position = "none", axis.text.x=element_blank(),
+          strip.background =element_rect(fill="#D3D5E3", color = "black"))
+```
+
+```{r fig.height = 4}
+#upf3b 
+txi_genes$abundance["ENSMUSG00000036572",] %>% melt() %>% 
+    rownames_to_column("sample") %>% cbind(md) %>% 
+    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
+    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
+    facet_grid(~Group, labeller = labeller(Group = group.labs))  + 
+    ylab("tpm") + theme_bw() + xlab("") + 
+    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170")) +
+    theme(legend.position = "none", axis.text.x=element_blank(),
+          strip.background =element_rect(fill="#D3D5E3", color = "black"))
+
+```
+
+## Filtering 
+
+```{r fig.height = 4}
+keep = (rowSums(txi_genes$abundance >= .5 ) >= 3)
+
+txi_genes$counts %>% cpm(log=TRUE) %>%
+    melt() %>%
+    dplyr::filter(is.finite(value)) %>% 
+    ggplot(aes(x=value, color = as.character(Var2))) +
+    geom_density() +
+    ggtitle("Before filtering") +
+    labs(x = "logCPM", y = "Proportion of Genes") + 
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+txi_genes$counts %>%
+    cpm(log=TRUE) %>%
+    magrittr::extract(keep,) %>% 
+    melt() %>%
+    dplyr::filter(is.finite(value)) %>% 
+    ggplot(aes(x=value, color = as.character(Var2))) +
+    geom_density() +
+    ggtitle("After filtering") +
+    labs(x = "logCPM", y = "Proportion of Genes") + theme_bw() +
+    theme(legend.position = "none")
+
+```
+
+Another level of filtering I'd like to do here is remove all genes that don't have an annotation 
+
+```{r fig.height= 4}
+txi_genes_filtered = txi_genes$counts[keep,] %>%  
+    as.data.frame() %>% 
+    rownames_to_column("geneID") %>%
+    mutate(geneName = mapIds(org.Mm.eg.db, keys=.$geneID,
+                             column="SYMBOL",keytype="ENSEMBL",
+                         multiVals="first")) %>%
+    drop_na(geneName) %>% 
+    column_to_rownames("geneID") %>% dplyr::select(-geneName)
+
+
+```
+## PCA 
+
+```{r fig.height=4.5}
+PC = log2(txi_genes$abundance[keep,]  + 10^-6 ) %>%
+    t() %>% 
+    prcomp(scale = TRUE)
+
+PC$x[,1:2] %>% 
+    as.data.frame()  %>%
+    cbind(md) %>%
+    ggplot(aes(PC1, PC2, color = Group, shape = Condition_UPF3B, label = Condition_UPF3B)) +
+    geom_point(size = 11.5) +
+    theme_bw() + scale_shape_manual(values = c(16,15)) + labs(shape="UPF3B status", colour= "Samples") +
+    theme(axis.title.y = element_text(size = 12), axis.title.x = element_text(size = 12), 
+          axis.text = element_text(size = 10)) +
+    xlab(paste0("Principal Component 1 (28.1%)")) + ylab("Principal Component 2 (16.6%)") +
+    scale_color_manual(values = c("#874257",  "#8B9488", "#657FA2", "#8483AD", "#C2A8BE", "#3A4170"),
+                      labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", 
+                                                                   "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD"))
+```
+
+
+## Boxplots of gene expression and library size 
+
+```{r fig.height =4}
+txi_genes$abundance[keep,] %>% 
+    as.data.frame() %>% 
+    gather(sample,value) %>% 
+    ggplot(aes(x=sample, y = log(value), fill = sample)) + geom_boxplot() +
+    ylab("Log(TPM)") + xlab("Samples") +
+    theme_bw() + theme(legend.position = "none") + scale_fill_manual(values = hydrangea[1:18])
+```
+
+```{r fig.height = 3}
+# Library size 
+
+countsSum <- colSums(txi_genes$counts) # library size
+countsSum %>% melt() %>% rownames_to_column("Sample") %>% 
+    ggplot(aes(x=Sample, y = value)) + geom_bar(stat = "identity") + ylab("Library size") +
+    theme_bw()
+
+#max(countsSum) / min(countsSum)
+
+```
+
+
+
+# Differential gene expression using limma 
+
+```{r}
+y <- DGEList(txi_genes_filtered)
+
+
+design <- model.matrix(~0+Group, data = md) %>% 
+    set_colnames(gsub(pattern = "Group", replacement ="", x = colnames(.)))
+
+contrasts <- makeContrasts(levels = colnames(design), 
+                           UPF3B_vs_Control = UPF3B_KD - Control, 
+                           UPF3A_vs_Control = UPF3A_KD - Control, 
+                           UPF3A_OE_vs_Control = UPF3A_OE - Control, 
+                           DoubleKD_vs_Control = UPF3A_KD_UPF3B_KD - Control, 
+                           UPF3A_OE_UPF3B_KD_vs_Control = UPF3A_OE_UPF3B_KD - Control)
+```
+
+
+```{r}
+y <- calcNormFactors(y)
+v <- voom(y, design)
+
+fit = lmFit(v, design) %>% 
+    contrasts.fit(contrasts) %>% 
+    eBayes()
+```
+
+```{r}
+results <- decideTests(fit, p.value = 0.05, adjust.method = "fdr", method= "global", lfc = log2(1.5))
+limma_results = write_fit(fit, results= results, adjust = "fdr") %>% 
+    rownames_to_column("ensembl_gene_id") %>% 
+    mutate(gene = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="SYMBOL",keytype="ENSEMBL", multiVals="first"), 
+           entrez = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="ENTREZID",keytype="ENSEMBL", multiVals="first")) %>% drop_na(entrez)
+
+
+#save(limma_results, file="/home/neuro/Documents/NMD_analysis/Analysis/Results/DEGs/DEG-limma-results.Rda")
+#save(results, fit,y,v,contrasts, design, contrasts,  file = "/home/neuro/Documents/NMD_analysis/Analysis/Results/DEGs/limma-matrices.Rda")
+
+```
+
+```{r}
+DEGenes <- list()
+DEGenes[["UPF3B_vs_Control"]] <- limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0, abs(Coef.UPF3B_vs_Control) > log2(1.5))
+DEGenes[["UPF3A_vs_Control"]] <- limma_results %>%
+    dplyr::filter(Res.UPF3A_vs_Control != 0, abs(Coef.UPF3A_vs_Control) > log2(1.5))
+DEGenes[["UPF3A_OE_vs_Control"]] <- limma_results %>%
+    dplyr::filter(Res.UPF3A_OE_vs_Control != 0, abs(Coef.UPF3A_OE_vs_Control) > log2(1.5)) %>%
+    arrange(p.value.UPF3A_OE_vs_Control)
+DEGenes[["DoubleKD_vs_Control"]] <- limma_results %>%
+    dplyr::filter(Res.DoubleKD_vs_Control != 0, abs(Coef.DoubleKD_vs_Control) > log2(1.5)) %>%
+    arrange(p.value.DoubleKD_vs_Control)
+DEGenes[["UPF3A_OE_UPF3B_KD_vs_Control"]] <- limma_results %>%
+    dplyr::filter(Res.UPF3A_OE_UPF3B_KD_vs_Control != 0, abs(Coef.UPF3A_OE_UPF3B_KD_vs_Control) > log2(1.5)) %>%
+    arrange(p.value.UPF3A_OE_UPF3B_KD_vs_Control)
+
+write.xlsx(DEGenes, "NMD-DEG-limma.xlsx")
+
+#save(DEGenes, file="/home/neuro/Documents/NMD_analysis/Analysis/Results/DEGs/DEG-list.Rda")
+
+```
+
+## Total number of DEGs 
+
+
+
+```{r}
+summary(results)
+```
+
+```{r fig.height=4}
+summary(results) %>% melt() %>% 
+    dplyr::filter(Var1 != "NotSig") %>% 
+    ggplot(aes(x=reorder(Var2, -value), y = value, fill=Var1)) + 
+    geom_bar(stat = "identity",   colour = "white") + 
+    theme_bw() + 
+    theme(axis.text.x = element_text(angle = 70,  hjust=1, face = "bold"), 
+          legend.position = "bottom", 
+          legend.title= element_blank(), axis.title.y = element_text(size = 12)) + 
+    scale_fill_manual(values = c("#0B032D", "#E56B6F")) +
+    ylab("No. DEGs") + xlab("") + scale_x_discrete(labels=c("UPF3A_KD_UPF3B_KD_vs_Control" = "Double KD", "UPF3A_KD_vs_Control" = "UPF3A KD", 
+                                                            "UPF3B_KD_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
+                                                            "UPF3A_OE_UPF3B_KD_vs_Control" = "UPF3A OE UPF3B KD"))
+
+```
+
+
+After performing pairwise differential gene expression analysis, we can see that majority of all significantly expressed genes in all contrasts are upregulated. Overall, we find that a total of 395 genes are differentially expressed between UPF3B KD and controls. 388 genes are differentially expressed between UPF3A KD vs Controls.
+
+
+## Overlapping DEGs 
+
+
+```{r}
+## Venn diagram and table representing each venn diagram with gene name and its results 
+ven <- venndetail(list("UPF3B KD" = DEGenes$UPF3B_vs_Control$gene, 
+                       "UPF3A KD" = DEGenes$UPF3A_vs_Control$gene,
+                    "Double KD" = DEGenes$DoubleKD_vs_Control$gene,
+                    "UPF3A OE" = DEGenes$UPF3A_OE_vs_Control$gene, 
+                  "UPF3A OE, UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$gene))
+```
+
+
+```{r}
+venn(list("UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id, 
+                       "UPF3A KD" = DEGenes$UPF3A_vs_Control$ensembl_gene_id,
+                    "Double KD" = DEGenes$DoubleKD_vs_Control$ensembl_gene_id,
+                    "UPF3A OE" = DEGenes$UPF3A_OE_vs_Control$ensembl_gene_id, 
+                  "UPF3A OE, UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$ensembl_gene_id))
+```
+
+
+```{r}
+#detail(ven) 
+```
+
+```{r}
+#result(ven)
+```
+
+
+## UPF3B vs Controls 
+
+
+```{r fig.height=5}
+DEColours <- c("-1" = "#503E5C", "1" = "#874257", "0" = "#D3D5E3")
+volc = limma_results %>%
+    ggplot(aes(x = Coef.UPF3B_vs_Control, 
+               y = -log10(p.value.UPF3B_vs_Control), 
+               colour = as.factor(as.character(Res.UPF3B_vs_Control)))) +
+    geom_point(alpha = 0.8, size =1) +
+    scale_colour_manual(values = DEColours) + theme_bw() + 
+    theme(legend.position = "none") +
+    geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
+    geom_hline(yintercept = -log10(limma_results %>% 
+                                       dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
+                                       use_series(p.value.UPF3B_vs_Control) %>% max), 
+               color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 p-value") +
+    ggtitle("UPF3B KD vs. Control") + xlim(-2.5,2.5) 
+
+
+my_gg = volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
+    size = 1, hover_nearest = TRUE)
+girafe(ggobj = my_gg)
+```
+
+
+```{r}
+DEGenes$UPF3B_vs_Control %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3B_vs")) %>% 
+    dplyr::select(-contains("Res")) %>% 
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+Given that previous studies have confirmed UPF3B KD results in a decrease of efficieny of NMD resulting in an increase of upregulated genes, we are interested in seeing how the signifiantly expressed upregulated genes behave in other conditions compared to controls.
+
+
+In order to do this, we will create a heatmap visualisaiton. 
+
+
+```{r fig.height=30}
+
+rg <- limma_results %>% 
+     dplyr::filter(Res.UPF3B_vs_Control == 1) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>% max(abs(.));
+
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>%
+    pheatmap(,
+        scale="none", 
+        cluster_cols = FALSE,
+        breaks = seq(-rg, rg, length.out = 100),
+        clustering_distance_rows = "euclidean", 
+        border_color = "white", 
+        treeheight_row = 0,
+        fontsize = 6,
+        color = colorRampPalette(c("#10c1e5", "#82e0b4","#F9F9F9", "#FBB829", "#FF0066"))(100),
+        labels_row = row.names(.), 
+        cellwidth = 8
+    )
+
+```
+
+From the heatmap above, we can notice a few trends that upregulated genes in UPF3B KD have in other conditions. 
+
+1) Inverted expression in UPF3A OE genes
+
+2) Inverted expression in UPF3A KD 
+
+
+These genes can be explored here: 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1) %>%
+    dplyr::select(gene, contains("Coef"))  %>%
+   # column_to_rownames("gene") %>%  
+    DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+    
+```
+
+
+### Overlap with other significant genes 
+
+We are now also interested in seeing how all genes differentially expressed in UPF3B KD overlap with significant genes from other conditions.
+
+
+#### Comparison with UPF3A KD significant genes 
+
+
+```{r}
+#venn(list("UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id, 
+ #                      "UPF3A KD" = DEGenes$UPF3A_vs_Control$ensembl_gene_id))
+```
+
+```{r}
+x = list( "UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id, 
+    "UPF3A KD" = DEGenes$UPF3A_vs_Control$ensembl_gene_id, 
+    "Double KD" = DEGenes$DoubleKD_vs_Control$ensembl_gene_id,
+    "UPF3A OE" = DEGenes$UPF3A_OE_vs_Control$ensembl_gene_id, 
+    "UPF3A OE UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$ensembl_gene_id)
+
+ggvenn(x[c(1,2)])
+```
+
+
+When we compare all significant genes in UPF3B KD with UPF3A KD, we can see that there is an overlap of 128 genes. 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() + ylab("UPF3A KD (log2FoldChange)") + xlab("UPF3B KD (log2FoldChange)")
+```
+
+
+When we compare the direction of gene expression in these 128 genes, we can see that there is a positive correlation (r = 0.68). 
+
+We are now interested in seeing which genes are present in each of the quadrants: 
+
+1) Quadrant 1:  Definied as x < 0, y > 0 where is significant genes belogning to UPF3A KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 12 genes belong to this group:
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == -1 & Res.UPF3A_vs_Control == 1) %>%  
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "UPF3A_vs"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+                   caption ="Overlapping genes between UPF3B KD and UPF3A KD relative to controls in Quadrant 1 (Upregulated in UPF3A KD, downregulated in UPF3B KD)",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 102 genes belong to this group. 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1 & Res.UPF3A_vs_Control ==1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "UPF3A_vs"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+    DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+                  caption ="Overlapping genes between UPF3B KD and UPF3A KD relative to controls in Quadrant 2 (Upregulated in both conditions)",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+3)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
+12 genes are in this quadrant:
+
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == -1 & Res.UPF3A_vs_Control == -1) %>%
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "UPF3A_vs"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+    DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+                  caption ="Overlapping genes between UPF3B KD and UPF3A KD relative to controls in Quadrant 3 (Downregulated in both conditions)",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+4) Quadrant 4 is defined as x > 0, y < 0, where significant genes belonging to UPF3B KD group are upregulated and genes belonging to UPF3A KD group are downregulated. Only 2 genes belong in this group. 
+
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1 & Res.UPF3A_vs_Control ==-1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "UPF3A_vs"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+                   caption ="Overlapping genes between UPF3B KD and UPF3A KD relative to controls in Quadrant 4 (Upregulated in UPF3B KD, downregulated in UPF3A KD)",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+
+We are also interested in seeing how the 128 overlapping genes between UPF3A and UPF3B KD behave in other conditions. To do this, we will use a heatmap visualisation again.
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>% 
+    dplyr::select(ensembl_gene_id,gene, contains(c("Coef."))) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Overlapping genes between UPF3B KD and UPF3A KD (padj < 0.05; absolute log2FoldChange > log2(1.5)) in other comparisons)",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r fig.height =20, out.extra='angle=90'}
+
+rg <- limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>% max(abs(.));
+
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>%
+    pheatmap(,
+       # scale="row", 
+        cluster_cols = FALSE,
+        breaks = seq(-rg, rg, length.out = 100),
+        clustering_distance_rows = "euclidean", 
+        border_color = "white", 
+        treeheight_row = 0,
+        cutree_rows = 2,
+        fontsize = 6,
+        color = colorRampPalette(c("#10c1e5", "#82e0b4","#F9F9F9", "#FBB829", "#FF0066"))(100),
+        labels_row = row.names(.),
+        cellheight = 10, 
+        cellwidth = 12
+    )
+
+
+```
+
+#### UPF3B vs Double KD 
+
+
+```{r}
+ggvenn(x[c(1,3)])
+```
+
+A total of 309 genes overlap betweeen the Double KDs and UPF3B KD. When we look at the correlation, we see that there is a strong positive correlation. 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.DoubleKD_vs_Control !=0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.DoubleKD_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() 
+```
+
+
+1) Quadrant 1:  Definied as x < 0, y > 0 where is significant genes belogning to Double KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 2 genes belong to this group:
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == -1 & Res.DoubleKD_vs_Control == 1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "Double"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 246 genes belong to this group. 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1 & Res.DoubleKD_vs_Control ==1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "DoubleKD"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+   DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+
+3)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
+61 genes are in this quadrant:
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == -1 & Res.DoubleKD_vs_Control == -1) %>%
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "DoubleKD"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+```
+
+### UPF3B vs UPF3A OE, UPF3B KD 
+
+
+```{r}
+ggvenn(x[c(1,5)])
+```
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_OE_UPF3B_KD_vs_Control !=0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_OE_UPF3B_KD_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() 
+
+```
+
+
+When we compare UPF3B KD with UPF3A OE in UPF3B KD cell lines, we can see there is a strong positive correlation. This correlaiton is very likely induced by the UPF3B KD cell line itself, and not the impact of the UPF3A OE.  For interest, here are the gene in Quadrant 2 and Quadrant 3
+
+
+1) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 170 genes belong to this group. 
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 1 & Res.UPF3A_OE_UPF3B_KD_vs_Control ==1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "DoubleKD"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+   DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+
+3)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
+64 genes are in this quadrant:
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == -1 & Res.UPF3A_OE_UPF3B_KD_vs_Control== -1) %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains(c("UPF3B_vs", "DoubleKD"))) %>% 
+    dplyr::arrange(Res.UPF3B_vs_Control) %>%
+     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+```
+
+
+Following up from this, it would be good to see how the genes that were specific to the UPF3B KD (159 genes) and UPF3A OE, UPF3B KD (97) behave relative to the other condition.
+
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 &  Res.UPF3A_OE_UPF3B_KD_vs_Control == 0 ) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_OE_UPF3B_KD_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() 
+```
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control ==0 &  Res.UPF3A_OE_UPF3B_KD_vs_Control != 0 ) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_OE_UPF3B_KD_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() 
+```
+
+Overall the above plots show that there is a strong positive correlation.
+
+
+## UPF3A 
+
+```{r UPF3A-volc,fig.height = 5}
+
+DEColours <- c("-1" = "#503E5C", "1" = "#874257", "0" = "#D3D5E3")
+volc = limma_results %>%
+    ggplot(aes(x = Coef.UPF3A_vs_Control, 
+               y = -log10(p.value.UPF3A_vs_Control), 
+               colour = as.factor(as.character(Res.UPF3A_vs_Control)))) +
+    geom_point(alpha = 0.8, size =0.8) +
+    scale_colour_manual(values = DEColours) + theme_bw() + 
+    theme(legend.position = "none") +
+    geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
+    geom_hline(yintercept = -log10(limma_results %>% 
+                                       dplyr::filter(Res.UPF3A_vs_Control != 0) %>% 
+                                       use_series(p.value.UPF3A_vs_Control) %>% max), 
+               color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 p-value") +
+    ggtitle("UPF3B KD vs. Control") + xlim(-2.5,2.5) 
+
+
+my_gg = volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
+    size = 1, hover_nearest = TRUE)
+girafe(ggobj = my_gg)
+```
+
+
+```{r}
+DEGenes$UPF3A_vs_Control %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3A_vs")) %>% 
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+                                                                                                                                                 caption = "Genes significantly expression in UPF3A KDs relative to Controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+
+
+
+
+### UPF3A vs Double KDs 
+
+```{r}
+ggvenn(x[c(2,3)])
+
+
+```
+
+
+```{r}
+limma_results %>% 
+    dplyr::filter(Res.UPF3A_vs_Control != 0 & Res.DoubleKD_vs_Control !=0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_OE_UPF3B_KD_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() 
+```
