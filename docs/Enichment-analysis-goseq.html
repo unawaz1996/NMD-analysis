@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="unawaz1996" />
+
+<meta name="date" content="2023-03-16" />
+
+<title>Enichment-analysis-goseq</title>
+
+<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.27/datatables.js"></script>
+<link href="site_libs/dt-core-1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.12.1/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.12.1/js/jquery.dataTables.min.js"></script>
+<script src="site_libs/jszip-1.12.1/jszip.min.js"></script>
+<script src="site_libs/pdfmake-1.12.1/pdfmake.js"></script>
+<script src="site_libs/pdfmake-1.12.1/vfs_fonts.js"></script>
+<link href="site_libs/dt-ext-buttons-1.12.1/css/buttons.dataTables.min.css" rel="stylesheet" />
+<script src="site_libs/dt-ext-buttons-1.12.1/js/dataTables.buttons.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.12.1/js/buttons.html5.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.12.1/js/buttons.colVis.min.js"></script>
+<script src="site_libs/dt-ext-buttons-1.12.1/js/buttons.print.min.js"></script>
+<link href="site_libs/dt-ext-fixedcolumns-1.12.1/css/fixedColumns.dataTables.min.css" rel="stylesheet" />
+<script src="site_libs/dt-ext-fixedcolumns-1.12.1/js/dataTables.fixedColumns.min.js"></script>
+<link href="site_libs/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="site_libs/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<link href="site_libs/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="site_libs/selectize-0.12.0/selectize.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">NMD-analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+<li>
+  <a href="DEG-analysis.html">Differential Expression Analysis</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/unawaz1996/NMD-analysis">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Enichment-analysis-goseq</h1>
+<h4 class="author">unawaz1996</h4>
+<h4 class="date">2023-03-16</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-03-17
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>NMD-analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230314code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230314)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230314code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230314)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistree84be588cb447adb80d1e460576fc42e72215c9d8targetblank84be588a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/84be588cb447adb80d1e460576fc42e72215c9d8" target="_blank">84be588</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistree84be588cb447adb80d1e460576fc42e72215c9d8targetblank84be588a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/84be588cb447adb80d1e460576fc42e72215c9d8" target="_blank">84be588</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  NMD-DEG-limma.xlsx
+    Untracked:  analysis/Enichment-analysis-fgsea.Rmd
+    Untracked:  analysis/Quality-control.Rmd
+    Untracked:  data/LTK_Sample Metafile_V3.txt
+    Untracked:  data/fastqc/
+    Untracked:  output/DEG-limma-results.Rda
+    Untracked:  output/DEG-list.Rda
+    Untracked:  output/limma-matrices.Rda
+
+Unstaged changes:
+    Modified:   analysis/DEG-analysis.Rmd
+    Modified:   code/libraries.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/Enichment-analysis-goseq.Rmd</code>) and HTML
+(<code>docs/Enichment-analysis-goseq.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/84be588cb447adb80d1e460576fc42e72215c9d8/analysis/Enichment-analysis-goseq.Rmd" target="_blank">84be588</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-03-17
+</td>
+<td>
+Enrichment analysis
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="enrichment-analysis-using-goseq" class="section level1">
+<h1>Enrichment analysis using goseq</h1>
+<pre class="r"><code>source(&quot;code/libraries.R&quot;)
+source(&quot;code/functions.R&quot;)</code></pre>
+<pre class="r"><code>load(&quot;output/limma-matrices.Rda&quot;)
+load(&quot;output/DEG-limma-results.Rda&quot;)
+load(&quot;output/DEG-list.Rda&quot;)</code></pre>
+<p>Testing for enrichment within discrete sets of DE genes as defined in
+the DEG analysis</p>
+</div>
+<div id="databases-used-for-testing" class="section level1">
+<h1>Databases used for testing</h1>
+<p>Data was sourced using the <code>misigdbr</code> package.</p>
+<div id="hallmark-gene-sets" class="section level2">
+<h2>Hallmark gene sets</h2>
+</div>
+<div id="c2-gene-set" class="section level2">
+<h2>C2 gene set</h2>
+</div>
+<div id="gene-ontology-gene-set" class="section level2">
+<h2>Gene Ontology Gene set</h2>
+</div>
+</div>
+<div id="enrichment-in-the-de-gene-set" class="section level1">
+<h1>Enrichment in the DE Gene Set</h1>
+<ul>
+<li><code>goseq</code> is an R package that performs enrichment analysis
+whilst taking length bias into account. It does so by calculating a
+Probability Weighting Function (PWF), which gives the probability that a
+gene will be differentially expressed based on length alone.</li>
+</ul>
+<p>The PWD is calculated by fitting a monotonic spline to the binary
+data series of differential expression (1 = DE, 0= Not DE) as a function
+of gene length. The PWF is used to weight the chance of selecting each
+gene when forming a null distribution for GO category membership. The
+fact that the PWF is calculated directly from the dataset under
+consideration makes this approach robust, only correcting for the length
+bias present in the data.</p>
+<p>Results can be intrepreted as following:</p>
+<ul>
+<li><code>overrpresented p-value</code>: Over representation in this
+analysis means that there are more DE genes in categort than expected.
+P-value relates to the probability of observing this number of DE genes
+in category by chance</li>
+<li><code>numDEinCat</code>: number of DE genes in category</li>
+<li><code>Expected</code>: Expected number of genes in category</li>
+<li><code>adjP</code> : Bonferroni adjustment of over represented
+p-value</li>
+<li><code>FDR</code>: FDR adjustment of over represented p-value</li>
+</ul>
+<p>The first step of analysis using goseq, regardless of the gene-set,
+is estimation of the probability weight function (PWF) which quantifies
+the probability of a gene being considered as DE based on a single
+covariate.</p>
+<pre class="r"><code>load(&quot;/home/neuro/Documents/NMD_analysis/Analysis/Genome/mouse_length.Rda&quot;)
+comparisons = c(&quot;UPF3B_vs_Control&quot;, &quot;UPF3A_vs_Control&quot;, 
+                &quot;UPF3A_OE_vs_Control&quot;, &quot;DoubleKD_vs_Control&quot;, &quot;UPF3A_OE_UPF3B_KD_vs_Control&quot;)</code></pre>
+<ol style="list-style-type: decimal">
+<li>GO terms</li>
+</ol>
+<p>For gene ontology analysis, we will be using the GO summaries method.
+Essentially, this analysis involves creating a graph for each ontology
+term, and removing the node <code>all</code>, as this redundant. For
+each GO term, we get the ontology it belongs to, the shortest path back
+to the root note, the longest path to the root node and whether it GO
+term is a terminal node.</p>
+<pre class="r"><code>gene_ontologies = list()
+for (c in comparisons){
+    analysis = limma_results %&gt;% dplyr::select(ensembl_gene_id, contains(c)) 
+    colnames(analysis) = gsub(paste0(&quot;.&quot;, c), &quot;&quot;, colnames(analysis))
+    genes = as.integer(analysis$Res == 1  | analysis$Res == -1)
+    not_na = !is.na(genes)
+    names(genes) = analysis$ensembl_gene_id
+    genes = genes[not_na]
+    gene_ont = get_ontologies(genes = genes)
+    gene_ont %&lt;&gt;% as.data.frame() %&gt;% 
+        mutate(Comparison = c(c))
+    gene_ontologies[[paste0(c)]] = gene_ont
+    }</code></pre>
+<pre><code>Using GO from GOseq</code></pre>
+<pre><code>Fetching GO annotations...</code></pre>
+<pre><code>Calculating the p-values...</code></pre>
+<pre><code>&#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre><code>Joining with `by = join_by(id, ontology)`</code></pre>
+<pre><code>Warning in pcls(G): initial point very close to some inequality constraints</code></pre>
+<pre><code>Using GO from GOseq
+Fetching GO annotations...
+Calculating the p-values...
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+Joining with `by = join_by(id, ontology)`Using GO from GOseq
+Fetching GO annotations...
+Calculating the p-values...
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+Joining with `by = join_by(id, ontology)`</code></pre>
+<pre><code>Warning in pcls(G): initial point very close to some inequality constraints</code></pre>
+<pre><code>Using GO from GOseq
+Fetching GO annotations...
+Calculating the p-values...
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+Joining with `by = join_by(id, ontology)`Using GO from GOseq
+Fetching GO annotations...
+Calculating the p-values...
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+Joining with `by = join_by(id, ontology)`</code></pre>
+<div id="upf3b" class="section level3">
+<h3>UPF3B</h3>
+<pre class="r"><code>gene_ontologies$UPF3B_vs_Control$Genes = sapply(gene_ontologies$UPF3B_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), &quot;,&quot;) %&gt;% unlist()
+            tmp %&lt;&gt;% as.data.frame() %&gt;% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column=&quot;SYMBOL&quot;,keytype=&quot;ENSEMBL&quot;, multiVals=&quot;first&quot;) %&gt;% 
+                unname
+            return(tmp)
+        })</code></pre>
+<pre><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre class="r"><code>gene_ontologies$UPF3B_vs_Control$Genes = vapply(gene_ontologies$UPF3B_vs_Control$Genes, paste, collapse = &quot;, &quot;, character(1L))
+
+gene_ontologies$UPF3B_vs_Control  %&gt;% 
+    dplyr::select(-c(&quot;Comparison&quot;,  contains(&quot;Sig&quot;), EnsemblID, shortest_path, longest_path, terminal_node)) %&gt;%
+ DT::datatable(filter = &#39;top&#39;, extensions = c(&#39;Buttons&#39;, &#39;FixedColumns&#39;),
+               caption =&quot;Significant gene ontology terms in UPF3B KD compared to controls&quot;,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = &#39;Blfrtip&#39;,
+                           buttons = c(&#39;copy&#39;, &#39;csv&#39;, &#39;excel&#39;, &#39;pdf&#39;, &#39;colvis&#39;),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,&quot;All&quot;))))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-dff419b18c84ddd6c2a0" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-dff419b18c84ddd6c2a0">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"5.8734328e-08\" data-max=\"7.527330819e-05\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"5\" data-max=\"23\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"10\" data-max=\"224\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"8\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"3.2715021203e-05\" data-max=\"0.0419272326617\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"3.2715021203e-05\" data-max=\"0.005989604665958\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons","FixedColumns"],"caption":"<caption>Significant gene ontology terms in UPF3B KD compared to controls<\/caption>","data":[["1","2","3","4","5","6","7"],["GO:1990266","GO:0030593","GO:0052547","GO:0018149","GO:0035023","GO:0004869","GO:0010959"],[5.87343289111132e-08,2.01244833375955e-06,5.02461421071867e-06,1.1318761164585e-05,6.73998203050497e-05,7.19991117316408e-05,7.52733081897662e-05],[13,10,23,5,9,7,19],[55,42,224,10,52,30,198],["neutrophil migration","neutrophil chemotaxis","regulation of peptidase activity","peptide cross-linking","regulation of Rho protein signal transduction","cysteine-type endopeptidase inhibitor activity","regulation of metal ion transport"],["BP","BP","BP","BP","BP","MF","BP"],[2,2,8,0,2,1,7],[3.27150212034901e-05,0.00112093372190407,0.0027987101153703,0.00630454996867382,0.0375416999099127,0.0401035052345239,0.0419272326616998],[3.27150212034901e-05,0.000560466860952033,0.0009329033717901,0.00157613749216846,0.00598960466595711,0.00598960466595711,0.00598960466595711],["Ccl9, Dpep1, Cd74, Adam8, Tlr2, Bst1, Spp1, Ccl7, Ccl2, Prex1, Tnfaip6, Prtn3, Cxcl2","Ccl9, Dpep1, Cd74, Bst1, Spp1, Ccl7, Ccl2, Prex1, Tnfaip6, Cxcl2","Lck, Slpi, Dpep1, Vsir, Serpinb9b, Xdh, Fas, Casp12, Casp1, Spint1, Renbp, Ctsh, Grn, Tnfrsf23, Nod1, Thbs1, Mbp, Serpinb9, Serpinb9g, Kng2, Serpinb9e, Ifi207, Hspa1b","Col3a1, Bgn, Mamdc2, Tgm2, Thbs1","Itga3, Abca1, Arhgef28, Pdgfrb, Eps8l2, Col3a1, Lpar6, Rtn4r, P2ry10b","Dpep1, Serpinb9b, Serpinb9, Serpinb9g, Kng2, Serpinb9e, Ctla2b","Hbp1, Ptpn6, Casq1, Trpv2, Nedd4l, Pdgfrb, Atp2b4, Nos3, Itpr1, Dmpk, Rrad, Slc8b1, Wnk4, Ccl2, Ptpn3, Cracr2b, P2ry6, 1810037I17Rik, Klhl24"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>over_represented_pvalue<\/th>\n      <th>numDEInCat<\/th>\n      <th>numInCat<\/th>\n      <th>term<\/th>\n      <th>ontology<\/th>\n      <th>Expected<\/th>\n      <th>adjP<\/th>\n      <th>FDR<\/th>\n      <th>Genes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"pageLength":5,"autoWidth":true,"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","colvis"],"lengthMenu":[[10,25,50,-1],["10","25","50","All"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4,7,8,9]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>terms = gene_ontologies$UPF3B_vs_Control %&gt;% 
+    dplyr::rename(ID = id, Category = ontology, adj_pval = adjP)
+genes = DEGenes$UPF3B_vs_Control %&gt;% 
+    dplyr::select(gene, contains(&quot;UPF3B_vs_Control&quot;)) %&gt;% 
+    dplyr::rename(ID = gene, logFC = Coef.UPF3B_vs_Control)
+goplot_data = circle_dat(terms, genes)
+
+processes = unique(goplot_data$term)
+
+genes_of_interest = goplot_data %&gt;% 
+  dplyr::select(genes, logFC) %&gt;% distinct(genes, logFC, .keep_all = TRUE) #%&gt;% 
+  #with(structure(logFC, names = genes))
+
+chord= chord_dat(goplot_data, genes_of_interest, processes)
+GOChord(chord, space = 0.02, gene.order = &#39;logFC&#39;, gene.space = 0.25, gene.size = 5, ribbon.col = c(&quot;red&quot;, &quot;yellow&quot;, &quot;orange&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;purple&quot;, &quot;pink&quot;), 
+        border.size = 0.25)</code></pre>
+<pre><code>Warning: Using size for a discrete variable is not advised.</code></pre>
+<pre><code>Warning: Removed 7 rows containing missing values (`geom_point()`).</code></pre>
+<p><img src="figure/Enichment-analysis-goseq.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="upf3a-kd" class="section level3">
+<h3>UPF3A KD</h3>
+<pre class="r"><code>gene_ontologies$UPF3A_vs_Control$Genes = sapply(gene_ontologies$UPF3A_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), &quot;,&quot;) %&gt;% unlist()
+            tmp %&lt;&gt;% as.data.frame() %&gt;% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column=&quot;SYMBOL&quot;,keytype=&quot;ENSEMBL&quot;, multiVals=&quot;first&quot;) %&gt;% 
+                unname
+            return(tmp)
+        })</code></pre>
+<pre><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre class="r"><code>gene_ontologies$UPF3A_vs_Control$Genes = vapply(gene_ontologies$UPF3A_vs_Control$Genes, paste, collapse = &quot;, &quot;, character(1L))
+
+gene_ontologies$UPF3A_vs_Control  %&gt;% 
+    dplyr::select(-c(&quot;Comparison&quot;,  contains(&quot;Sig&quot;), EnsemblID, shortest_path, longest_path, terminal_node)) %&gt;%
+ DT::datatable(filter = &#39;top&#39;, extensions = c(&#39;Buttons&#39;, &#39;FixedColumns&#39;),
+               caption =&quot;Significant gene ontology terms in UPF3A KD compared to controls&quot;,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = &#39;Blfrtip&#39;,
+                           buttons = c(&#39;copy&#39;, &#39;csv&#39;, &#39;excel&#39;, &#39;pdf&#39;, &#39;colvis&#39;),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,&quot;All&quot;))))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-30bc67abe73b99e6611f" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-30bc67abe73b99e6611f">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"3.04778992e-07\" data-max=\"4.6389319295e-05\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"9\" data-max=\"36\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"28\" data-max=\"474\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1\" data-max=\"17\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.000152389496236\" data-max=\"0.023194659647382\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.000152389496236\" data-max=\"0.004638931929477\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons","FixedColumns"],"caption":"<caption>Significant gene ontology terms in UPF3A KD compared to controls<\/caption>","data":[["1","2","3","4","5"],["GO:0004867","GO:0071345","GO:0004866","GO:0002706","GO:0022836"],[3.047789924727e-07,1.26970643272864e-05,1.2951134586544e-05,2.95925462841467e-05,4.63893192947625e-05],[9,36,11,14,11],[28,474,64,110,72],["serine-type endopeptidase inhibitor activity","cellular response to cytokine stimulus","endopeptidase inhibitor activity","regulation of lymphocyte mediated immunity","gated channel activity"],["MF","BP","MF","BP","MF"],[1,17,2,4,3],[0.00015238949623635,0.00634853216364319,0.00647556729327202,0.0147962731420734,0.0231946596473813],[0.00015238949623635,0.00215852243109067,0.00215852243109067,0.00369906828551834,0.00463893192947625],["Serpinb9b, Serpinb8, Spint1, Serpine1, Serpinb9f, Serpinb6b, Serpinb1a, Serpinb9g, Serpinb9e","Ptpn6, Hyal1, Cd40, Angpt1, Syngr1, Hcls1, Il33, Irf7, Casp1, Il18rap, Fn1, Tlr2, Cxcl1, Oasl2, Pde2a, Rbmx, Cx3cl1, Parp16, Gstt2, Casp4, Parp14, Ifit1, Serpine1, Oasl1, Ackr3, Irgm1, Crebrf, Fzd4, Oas1a, Ptp4a3, Irak2, Sphk1, Fabp4, Ifi27, Oas1g, 9930111J21Rik1","Serpinb9b, Serpinb8, Spint1, Serpine1, Serpinb9f, Serpinb6b, Serpinb1a, Serpinb9g, Kng2, Serpinb9e, Ctla2b","Ptpn6, Cd40, Tnfsfm13, Serpinb9b, Ripk3, Il18rap, Mr1, Cadm1, Serpinb9f, H2-T24, H2-T3, Serpinb9g, Serpinb9e, Tnfsf13","Gabrr2, P2rx3, Itgav, Chrna1, Glrb, Tpcn1, Ttyh2, Piezo2, Kcne4, Clca3a1, Kcnj14"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>over_represented_pvalue<\/th>\n      <th>numDEInCat<\/th>\n      <th>numInCat<\/th>\n      <th>term<\/th>\n      <th>ontology<\/th>\n      <th>Expected<\/th>\n      <th>adjP<\/th>\n      <th>FDR<\/th>\n      <th>Genes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"pageLength":5,"autoWidth":true,"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","colvis"],"lengthMenu":[[10,25,50,-1],["10","25","50","All"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4,7,8,9]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>terms = gene_ontologies$UPF3A_vs_Control %&gt;% 
+    dplyr::rename(ID = id, Category = ontology, adj_pval = adjP)
+genes = DEGenes$UPF3A_vs_Control %&gt;% 
+    dplyr::select(gene, contains(&quot;UPF3A_vs_Control&quot;)) %&gt;% 
+    dplyr::rename(ID = gene, logFC = Coef.UPF3A_vs_Control)
+goplot_data = circle_dat(terms, genes)
+
+processes = unique(goplot_data$term)
+
+genes_of_interest = goplot_data %&gt;% 
+  dplyr::select(genes, logFC) %&gt;% distinct(genes, logFC, .keep_all = TRUE) #%&gt;% 
+  #with(structure(logFC, names = genes))
+
+chord= chord_dat(goplot_data, genes_of_interest, processes)
+GOChord(chord, space = 0.02, gene.order = &#39;logFC&#39;, gene.space = 0.25, gene.size = 5, 
+        border.size = 0.25)</code></pre>
+<pre><code>Warning: Using size for a discrete variable is not advised.</code></pre>
+<pre><code>Warning: Removed 5 rows containing missing values (`geom_point()`).</code></pre>
+<p><img src="figure/Enichment-analysis-goseq.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="double-kd" class="section level3">
+<h3>Double KD</h3>
+<pre class="r"><code>gene_ontologies$DoubleKD_vs_Control$Genes = sapply(gene_ontologies$DoubleKD_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), &quot;,&quot;) %&gt;% unlist()
+            tmp %&lt;&gt;% as.data.frame() %&gt;% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column=&quot;SYMBOL&quot;,keytype=&quot;ENSEMBL&quot;, multiVals=&quot;first&quot;) %&gt;% 
+                unname
+            return(tmp)
+        })</code></pre>
+<pre><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre class="r"><code>gene_ontologies$DoubleKD_vs_Control$Genes = vapply(gene_ontologies$DoubleKD_vs_Control$Genes, paste, collapse = &quot;, &quot;, character(1L))
+
+gene_ontologies$DoubleKD_vs_Control  %&gt;% 
+    dplyr::select(-c(&quot;Comparison&quot;,  contains(&quot;Sig&quot;), EnsemblID, shortest_path, longest_path, terminal_node)) %&gt;%
+ DT::datatable(filter = &#39;top&#39;, extensions = c(&#39;Buttons&#39;, &#39;FixedColumns&#39;),
+               caption =&quot;Significant gene ontology terms in Double KD compared to controls&quot;,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = &#39;Blfrtip&#39;,
+                           buttons = c(&#39;copy&#39;, &#39;csv&#39;, &#39;excel&#39;, &#39;pdf&#39;, &#39;colvis&#39;),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,&quot;All&quot;))))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-7d9abfab75f06c8acde6" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-7d9abfab75f06c8acde6">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1.9066965e-08\" data-max=\"3.5214823376e-05\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"8\" data-max=\"75\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"14\" data-max=\"493\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"1\" data-max=\"46\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"2.421504619e-05\" data-max=\"0.044722825686892\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"2.421504619e-05\" data-max=\"0.001542166402997\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons","FixedColumns"],"caption":"<caption>Significant gene ontology terms in Double KD compared to controls<\/caption>","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29"],["GO:0006820","GO:0006812","GO:0015711","GO:0071715","GO:0043410","GO:0005509","GO:0006874","GO:0006691","GO:0072503","GO:0070588","GO:0055074","GO:0032680","GO:1990266","GO:0055080","GO:0050801","GO:0015718","GO:0006816","GO:0072507","GO:0051924","GO:0010959","GO:0098662","GO:0005764","GO:0046942","GO:0006875","GO:0030003","GO:0032309","GO:0015849","GO:0030198","GO:0010466"],[1.90669655046563e-08,4.21150179766175e-07,6.84452455287428e-07,1.79143274107003e-06,2.39279994807566e-06,3.01961627631073e-06,4.03545056151333e-06,4.81083591548082e-06,5.18434528471204e-06,5.61840027897163e-06,6.71393990922831e-06,7.18622429696327e-06,8.86861644252885e-06,8.89378912488457e-06,9.21612522413561e-06,9.31572213118505e-06,1.36903020047575e-05,1.37302836868925e-05,1.38311064071437e-05,1.48331735590063e-05,1.73242572706812e-05,1.80184087828489e-05,1.82390570718461e-05,1.84745167190589e-05,1.94546170656873e-05,1.95115943405143e-05,2.10653057537655e-05,2.7307814862206e-05,3.52148233755052e-05],[44,75,32,11,48,45,31,8,33,29,32,23,16,51,52,13,35,34,27,36,47,57,25,39,44,9,29,29,22],[212,493,147,24,275,256,150,14,167,138,161,99,55,317,325,38,190,182,130,198,290,382,118,225,267,20,149,147,101],["anion transport","cation transport","organic anion transport","icosanoid transport","positive regulation of MAPK cascade","calcium ion binding","cellular calcium ion homeostasis","leukotriene metabolic process","cellular divalent inorganic cation homeostasis","calcium ion transmembrane transport","calcium ion homeostasis","regulation of tumor necrosis factor production","neutrophil migration","cation homeostasis","ion homeostasis","monocarboxylic acid transport","calcium ion transport","divalent inorganic cation homeostasis","regulation of calcium ion transport","regulation of metal ion transport","inorganic cation transmembrane transport","lysosome","carboxylic acid transport","cellular metal ion homeostasis","cellular cation homeostasis","icosanoid secretion","organic acid transport","extracellular matrix organization","negative regulation of peptidase activity"],["BP","BP","BP","BP","BP","MF","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","BP","CC","BP","BP","BP","BP","BP","BP","BP"],[20,46,14,2,26,24,14,1,16,13,15,9,5,30,31,4,18,17,12,19,27,36,11,21,25,2,14,14,9],[2.42150461909135e-05,0.000534860728303043,0.000869254618215033,0.00227511958115894,0.00303885593405609,0.00383491267091463,0.00512502221312193,0.00610976161266064,0.00658411851158429,0.00713536835429397,0.00852670368471995,0.00912650485714336,0.0112631428820116,0.0112951121886034,0.0117044790346522,0.011830967106605,0.017386683546042,0.0174374602823534,0.0175655051370725,0.018838130419938,0.0220018067337651,0.0228833791542181,0.0231636024812446,0.0234626362332048,0.0247073636734228,0.0247797248124532,0.0267529383072821,0.0346809248750016,0.0447228256868917],[2.42150461909135e-05,0.000267430364151521,0.000289751539405011,0.000568779895289734,0.000607771186811218,0.000639152111819106,0.000713536835429397,0.000713536835429397,0.000713536835429397,0.000713536835429397,0.000739435444162813,0.000739435444162813,0.000739435444162813,0.000739435444162813,0.000739435444162813,0.000739435444162813,0.000924500270372239,0.000924500270372239,0.000924500270372239,0.000941906520996901,0.000953066338940506,0.000953066338940506,0.000953066338940506,0.000953066338940506,0.000953066338940506,0.000953066338940506,0.000990849566936376,0.00123860445982149,0.00154216640299626],["Slc22a18, Slc5a5, Clcn3, Slc2a9, Ctns, Slc44a4, Mgst1, Slc1a7, Slc47a1, Slc25a13, Slc36a1, Map2k6, Slc4a7, Clcn2, Slc4a8, Gabrr2, Sfxn3, Slc11a1, Slc52a3, Slc7a11, Glrb, Slc66a1, Pla2g2e, Slc10a6, P2rx7, Cln3, Slco2b1, Car7, Slc37a4, Slc37a2, Slco2a1, P2ry2, Sfxn5, Slc12a8, Slc26a11, Abcb1a, Pla2g5, Pla2g2d, Slc7a1, Proca1, Pla2g4f, P2ry6, Ptges, Slco1a6","Slc5a5, Fmr1, Hbp1, Cp, Gstm7, Ptpn6, Clcn3, Slc44a4, Casq1, Slc47a1, Trpv2, Slc36a1, Itgb3, Atp2a3, Glrx, Pde4d, Slc4a7, Ero1a, Rapgef3, Slc4a8, Prkn, Nedd4l, Pdgfrb, Sfxn3, Cnga3, Slc11a1, Gpr39, Steap3, Atp2b4, P2rx3, Chrna1, Commd9, Syt13, Ptpn22, Ngf, Slc66a1, Abcb8, Nos3, Slc10a6, P2rx7, Cabp1, Dmpk, Cln3, Syt8, Cx3cl1, Rrad, Stoml1, Tpcn1, Slc8b1, Atp6v0b, Ccl2, Slc12a8, Fgf2, Serpine1, Atp13a4, Ptpn3, Atp6v0e2, Orai2, Stac3, Abcb1a, Chrnb1, Slc7a1, Piezo2, Lyn, S100a1, Cracr2b, P2ry6, Tmem37, 1810037I17Rik, Bcl2, Syt17, Kcnj14, Klhl24, Slc31a2, Xntrpc","Slc2a9, Ctns, Slc44a4, Mgst1, Slc1a7, Slc47a1, Slc25a13, Slc36a1, Map2k6, Slc4a7, Slc4a8, Sfxn3, Slc11a1, Slc52a3, Slc7a11, Slc66a1, Pla2g2e, Slc10a6, P2rx7, Cln3, Slco2b1, Slc37a2, Slco2a1, P2ry2, Sfxn5, Pla2g5, Pla2g2d, Slc7a1, Proca1, Pla2g4f, Ptges, Slco1a6","Map2k6, Pla2g2e, P2rx7, Slco2b1, Slco2a1, P2ry2, Pla2g5, Pla2g2d, Proca1, Pla2g4f, Ptges","Gadd45b, C1qtnf1, Cd40, Wwc1, Ccl9, Map2k6, Itgb3, Pik3r5, Traf3, Gcnt2, Gadd45g, Angpt1, Ccl25, Xdh, Lmnb1, Pdgfrb, Adam8, Gpr39, Src, Ptpn22, Ngf, Tlr2, Pdgfc, P2rx7, Flt1, Gpnmb, Cx3cl1, Cspg4, Mid1, Ccl2, Fgf2, Nod1, Mturn, Cdon, Tlr4, Thbs1, Pla2g5, Fzd5, P2ry6, Fzd4, Ndst1, Ghr, Trim12c, Trim30d, Taok3, Sphk1, Arhgap8, Cntf","Aif1l, Fkbp7, Fbln1, Casq1, Oit3, Slc25a13, Calr3, Efemp1, Lcp1, Enpp2, Arsa, Adam8, Cdhr5, Gsn, Syt13, Necab3, Tpd52, Cdh17, Pla2g2e, Alpl, Pef1, Masp2, Cabp1, Syt8, Glce, Rcn2, Plscr1, S100b, Pla2g4c, Tgm2, Thbs1, Ltbp4, Pla2g5, Pla2g2d, S100a14, Pcdhb14, S100a1, Pla2g4f, Cracr2b, C1ra, Syt17, Tubb4a, S100a7a, Fbln2, Heg1","Gstm7, Ptpn6, Casq1, Cd40, Itgb3, Atp2a3, Pde4d, Ero1a, Grina, Bok, Gpr39, Atp2b4, Ngf, Spp1, P2rx7, Dmpk, Cln3, Cx3cl1, Slc37a4, Slc8b1, P2ry2, S100b, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Xntrpc","Dpep1, Ltc4s, Mgst3, Tlr2, Tlr4, Pla2g5, Dpep2, Mgst2","Gstm7, Ptpn6, Casq1, Cd40, Itgb3, Atp2a3, Pde4d, Ero1a, Grina, Hps1, Slc11a1, Bok, Gpr39, Atp2b4, Ngf, Spp1, P2rx7, Dmpk, Cln3, Cx3cl1, Slc37a4, Slc8b1, P2ry2, S100b, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Xntrpc","Fmr1, Gstm7, Ptpn6, Casq1, Trpv2, Itgb3, Atp2a3, Pde4d, Ero1a, Rapgef3, Gpr39, Atp2b4, Ptpn22, Ngf, P2rx7, Cabp1, Cx3cl1, Rrad, Tpcn1, Slc8b1, Fgf2, Stac3, Lyn, S100a1, P2ry6, Tmem37, 1810037I17Rik, Bcl2, Xntrpc","Gstm7, Ptpn6, Casq1, Cd40, Itgb3, Atp2a3, Pde4d, Ero1a, Grina, Bok, Gpr39, Atp2b4, Ngf, Alpl, Spp1, P2rx7, Dmpk, Cln3, Cx3cl1, Slc37a4, Slc8b1, P2ry2, S100b, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Xntrpc","Lgals9, Oas1c, Ptpn6, Cd34, Vsir, Angpt1, Setd4, Ly96, Ptpn22, Tlr2, Gpnmb, Cx3cl1, Ccl2, Spon2, Mavs, Nod1, Tlr4, Ptger4, Thbs1, Fzd5, Nlrc3, Oas1a, Arfgef2","Ccl9, Dpep1, Pde4d, Ccl25, Adam8, Tlr2, Bst1, Spp1, Cx3cl1, Slc37a4, Ccl2, Prex1, Ptger4, C3ar1, Trem3, Prtn3","Cp, Gstm7, Ptpn6, Hmox1, Casq1, Cd40, Pdk4, Cyb561, Itgb3, Atp2a3, Pde4d, Slc4a7, Ero1a, Grina, Slc4a8, Hps1, Slc11a1, Bok, Gpr39, Steap3, Atp2b4, Ngf, Bdh2, Alpl, Spp1, P2rx7, Dmpk, Cln3, Rab20, Cx3cl1, Car7, Slc37a4, Slc8b1, P2ry2, S100b, Frrs1, Cyb561a3, Grn, Ccl2, Tnni3, Slc12a8, Fgf2, Tgm2, Atp13a4, Pdk2, Ptger4, Lyn, P2ry6, Bcl2, Slc31a2, Xntrpc","Cp, Gstm7, Ptpn6, Hmox1, Casq1, Cd40, Pdk4, Cyb561, Itgb3, Atp2a3, Pde4d, Slc4a7, Ero1a, Grina, Slc4a8, Hps1, Slc11a1, Bok, Gpr39, Steap3, Atp2b4, Slc7a11, Ngf, Bdh2, Alpl, Spp1, P2rx7, Dmpk, Cln3, Rab20, Cx3cl1, Car7, Slc37a4, Slc8b1, P2ry2, S100b, Frrs1, Cyb561a3, Grn, Ccl2, Tnni3, Slc12a8, Fgf2, Tgm2, Atp13a4, Pdk2, Ptger4, Lyn, P2ry6, Bcl2, Slc31a2, Xntrpc","Map2k6, Pla2g2e, Slc10a6, P2rx7, Slco2b1, Slco2a1, P2ry2, Pla2g5, Pla2g2d, Proca1, Pla2g4f, Ptges, Slco1a6","Fmr1, Gstm7, Ptpn6, Casq1, Trpv2, Itgb3, Atp2a3, Pde4d, Ero1a, Rapgef3, Pdgfrb, Gpr39, Atp2b4, Ptpn22, Ngf, Nos3, P2rx7, Cabp1, Cx3cl1, Rrad, Tpcn1, Slc8b1, Ccl2, Fgf2, Serpine1, Orai2, Stac3, Lyn, S100a1, Cracr2b, P2ry6, Tmem37, 1810037I17Rik, Bcl2, Xntrpc","Gstm7, Ptpn6, Casq1, Cd40, Itgb3, Atp2a3, Pde4d, Ero1a, Grina, Hps1, Slc11a1, Bok, Gpr39, Atp2b4, Ngf, Alpl, Spp1, P2rx7, Dmpk, Cln3, Cx3cl1, Slc37a4, Slc8b1, P2ry2, S100b, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Xntrpc","Fmr1, Gstm7, Ptpn6, Casq1, Trpv2, Itgb3, Pde4d, Rapgef3, Pdgfrb, Gpr39, Ptpn22, Ngf, Nos3, P2rx7, Cabp1, Cx3cl1, Rrad, Slc8b1, Ccl2, Serpine1, Stac3, Lyn, S100a1, Cracr2b, P2ry6, 1810037I17Rik, Bcl2","Fmr1, Hbp1, Gstm7, Ptpn6, Casq1, Trpv2, Itgb3, Glrx, Pde4d, Rapgef3, Nedd4l, Pdgfrb, Gpr39, Atp2b4, Ptpn22, Ngf, Nos3, P2rx7, Cabp1, Dmpk, Cx3cl1, Rrad, Stoml1, Slc8b1, Ccl2, Serpine1, Ptpn3, Stac3, Lyn, S100a1, Cracr2b, P2ry6, 1810037I17Rik, Bcl2, Klhl24, Slc31a2","Fmr1, Gstm7, Ptpn6, Clcn3, Casq1, Trpv2, Slc36a1, Itgb3, Atp2a3, Glrx, Pde4d, Ero1a, Rapgef3, Slc4a8, Nedd4l, Cnga3, Slc11a1, Gpr39, Steap3, Atp2b4, P2rx3, Ptpn22, Ngf, Abcb8, P2rx7, Cabp1, Cx3cl1, Rrad, Stoml1, Tpcn1, Slc8b1, Atp6v0b, Slc12a8, Fgf2, Ptpn3, Atp6v0e2, Stac3, Lyn, S100a1, P2ry6, Tmem37, 1810037I17Rik, Bcl2, Kcnj14, Klhl24, Slc31a2, Xntrpc","Glmp, Pld3, Clcn3, Ctns, Neu1, Hyal1, Galns, Cd34, Cd68, Trip10, Cyb561, Fuca2, Srgn, Slc36a1, Naga, Arsa, Tpsab1, Npc1, H2-M10.1, Pdgfrb, Slc15a3, Lipa, Hexa, Adam8, Slc11a1, Dpp7, Src, Gba, Pip4p2, Slc66a1, Cln3, Tpp1, Gla, Map1lc3b, Pla2g15, Ctsh, Tpcn1, P2ry2, Meak7, Vps18, Cyb561a3, Grn, Rilp, Slc26a11, Pla2g5, Stx3, Serpinb1a, Irgm1, Bri3, 4930486L24Rik, Rab7b, H2-T3, Prtn3, Tecpr1, H2-T23, Ap5s1, Ctla2b","Ctns, Slc1a7, Slc47a1, Slc25a13, Slc36a1, Map2k6, Sfxn3, Slc11a1, Slc7a11, Slc66a1, Pla2g2e, Slc10a6, P2rx7, Cln3, Slco2b1, Slco2a1, P2ry2, Sfxn5, Pla2g5, Pla2g2d, Slc7a1, Proca1, Pla2g4f, Ptges, Slco1a6","Gstm7, Ptpn6, Hmox1, Casq1, Cd40, Cyb561, Itgb3, Atp2a3, Pde4d, Ero1a, Grina, Hps1, Slc11a1, Bok, Gpr39, Steap3, Atp2b4, Ngf, Spp1, P2rx7, Dmpk, Cln3, Cx3cl1, Slc37a4, Slc8b1, P2ry2, S100b, Frrs1, Cyb561a3, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Slc31a2, Xntrpc","Gstm7, Ptpn6, Hmox1, Casq1, Cd40, Cyb561, Itgb3, Atp2a3, Pde4d, Slc4a7, Ero1a, Grina, Slc4a8, Hps1, Slc11a1, Bok, Gpr39, Steap3, Atp2b4, Ngf, Spp1, P2rx7, Dmpk, Cln3, Rab20, Cx3cl1, Car7, Slc37a4, Slc8b1, P2ry2, S100b, Frrs1, Cyb561a3, Grn, Ccl2, Tnni3, Fgf2, Tgm2, Atp13a4, Lyn, P2ry6, Bcl2, Slc31a2, Xntrpc","Map2k6, Pla2g2e, P2rx7, P2ry2, Pla2g5, Pla2g2d, Proca1, Pla2g4f, Ptges","Crabp2, Ctns, Slc1a7, Slc47a1, Slc25a13, Slc36a1, Map2k6, Sfxn3, Slc11a1, Slc7a11, Plin2, Slc66a1, Pla2g2e, Slc10a6, P2rx7, Cln3, Slco2b1, P2ry2, Sfxn5, Thbs1, Abcb1a, Pla2g5, Pla2g2d, Slc7a1, Proca1, Pla2g4f, Ptges, Fabp4, Slco1a6","Mmp14, Col5a3, Fbln1, Serac1, Aebp1, Itgb3, Ero1a, Lcp1, Tpsab1, Col17a1, Mmp19, Col5a2, Col3a1, Dpt, Col5a1, Spint1, B4galt1, Col4a5, Myo1e, Adamts7, Tnxb, Antxr1, Qsox1, Tgfbi, Adamts2, Ltbp4, Lamb2, Flot1, Fbln2","Klf4, Slpi, Dpep1, Rffl, Serpinb9b, Fetub, Tfpi, Spint1, Src, Ngf, Ecm1, Renbp, Serpine1, Serpinb9f, Thbs1, Mrtfa, Serpinb6b, Serpinb1a, Serpinb9, Kng2, Serpinb9e, Ifi207"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>over_represented_pvalue<\/th>\n      <th>numDEInCat<\/th>\n      <th>numInCat<\/th>\n      <th>term<\/th>\n      <th>ontology<\/th>\n      <th>Expected<\/th>\n      <th>adjP<\/th>\n      <th>FDR<\/th>\n      <th>Genes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"pageLength":5,"autoWidth":true,"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","colvis"],"lengthMenu":[[10,25,50,-1],["10","25","50","All"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4,7,8,9]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="upf3a-oe" class="section level3">
+<h3>UPF3A OE</h3>
+<pre class="r"><code>#gene_ontologies$UPF3A_OE_vs_Control$Genes = sapply(gene_ontologies$UPF3A_OE_vs_Control$EnsemblID, function(x){
+#            tmp = strsplit(as.character(x), &quot;,&quot;) %&gt;% unlist()
+#            tmp %&lt;&gt;% as.data.frame() %&gt;% mutate_if(is.character, str_trim)
+#            tmp = tmp[[1]]
+#            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column=&quot;SYMBOL&quot;,keytype=&quot;ENSEMBL&quot;, multiVals=&quot;first&quot;) %&gt;% 
+#                unname
+#            return(tmp)
+#        })
+#gene_ontologies$UPF3A_OE_vs_Control$Genes = vapply(gene_ontologies$UPF3A_OE_vs_Control$Genes, paste, collapse = &quot;, &quot;, character(1L))
+
+gene_ontologies$UPF3A_OE_vs_Control  %&gt;% 
+    dplyr::select(-c(&quot;Comparison&quot;,  contains(&quot;Sig&quot;),  shortest_path, longest_path, terminal_node)) %&gt;%
+ DT::datatable(filter = &#39;top&#39;, extensions = c(&#39;Buttons&#39;, &#39;FixedColumns&#39;),
+               caption =&quot;Significant gene ontology terms in UPF3A OE compared to controls&quot;,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = &#39;Blfrtip&#39;,
+                           buttons = c(&#39;copy&#39;, &#39;csv&#39;, &#39;excel&#39;, &#39;pdf&#39;, &#39;colvis&#39;),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,&quot;All&quot;))))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-c175811833121586a4d9" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-c175811833121586a4d9">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.000598852446366\" data-max=\"0.000598852446367\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.005389672017302\" data-max=\"0.005389672017303\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.005389672017302\" data-max=\"0.005389672017303\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons","FixedColumns"],"caption":"<caption>Significant gene ontology terms in UPF3A OE compared to controls<\/caption>","data":[["1"],["GO:0014074"],[0.000598852446366889],[3],[59],["response to purine-containing compound"],["BP"],["ENSMUSG00000004035, ENSMUSG00000019102, ENSMUSG00000027071"],[0],[0.005389672017302],[0.005389672017302]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>over_represented_pvalue<\/th>\n      <th>numDEInCat<\/th>\n      <th>numInCat<\/th>\n      <th>term<\/th>\n      <th>ontology<\/th>\n      <th>EnsemblID<\/th>\n      <th>Expected<\/th>\n      <th>adjP<\/th>\n      <th>FDR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"pageLength":5,"autoWidth":true,"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","colvis"],"lengthMenu":[[10,25,50,-1],["10","25","50","All"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4,8,9,10]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="upf3a-oe-upf3b-kd" class="section level3">
+<h3>UPF3A OE UPF3B KD</h3>
+<pre class="r"><code>gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes = sapply(gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), &quot;,&quot;) %&gt;% unlist()
+            tmp %&lt;&gt;% as.data.frame() %&gt;% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column=&quot;SYMBOL&quot;,keytype=&quot;ENSEMBL&quot;, multiVals=&quot;first&quot;) %&gt;% 
+                unname
+            return(tmp)
+        })</code></pre>
+<pre><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns
+&#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre class="r"><code>gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes = vapply(gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes, paste, collapse = &quot;, &quot;, character(1L))
+
+gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control  %&gt;% 
+    dplyr::select(-c(&quot;Comparison&quot;,  contains(&quot;Sig&quot;), EnsemblID, shortest_path, longest_path, terminal_node)) %&gt;%
+ DT::datatable(filter = &#39;top&#39;, extensions = c(&#39;Buttons&#39;, &#39;FixedColumns&#39;),
+               caption =&quot;Significant gene ontology terms in UPF3A OE, UPF3B KD compared to controls&quot;,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = &#39;Blfrtip&#39;,
+                           buttons = c(&#39;copy&#39;, &#39;csv&#39;, &#39;excel&#39;, &#39;pdf&#39;, &#39;colvis&#39;),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,&quot;All&quot;))))</code></pre>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-d13677371465726ee3bd" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d13677371465726ee3bd">{"x":{"filter":"top","vertical":false,"filterHTML":"<tr>\n  <td><\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"5.90248759e-07\" data-max=\"9.0265050285e-05\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"5\" data-max=\"21\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"10\" data-max=\"275\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\" disabled=\"\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0\" data-max=\"9\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.000302207364773\" data-max=\"0.046215705745609\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none;position: absolute;width: 200px;opacity: 1\">\n      <div data-min=\"0.000302207364773\" data-max=\"0.005135078416179\" data-scale=\"15\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","extensions":["Buttons","FixedColumns"],"caption":"<caption>Significant gene ontology terms in UPF3A OE, UPF3B KD compared to controls<\/caption>","data":[["1","2","3","4","5","6","7","8","9"],["GO:1990266","GO:0030593","GO:0018149","GO:0030198","GO:0032680","GO:0010951","GO:0010466","GO:0051346","GO:0043410"],[5.90248759324109e-07,3.47627909318138e-06,5.43008828993094e-06,3.70982087839943e-05,4.13557218595138e-05,4.19240607758933e-05,5.0521748112082e-05,5.16218119560884e-05,9.02650502843926e-05],[11,9,5,15,12,11,12,16,21],[55,42,10,147,99,84,101,169,275],["neutrophil migration","neutrophil chemotaxis","peptide cross-linking","extracellular matrix organization","regulation of tumor necrosis factor production","negative regulation of endopeptidase activity","negative regulation of peptidase activity","negative regulation of hydrolase activity","positive regulation of MAPK cascade"],["BP","BP","BP","BP","BP","BP","BP","BP","BP"],[2,1,0,5,3,3,3,5,9],[0.000302207364773944,0.00177985489570886,0.00278020520444464,0.0189942828974051,0.0211741295920711,0.0214651191172574,0.025867135033386,0.0264303677215173,0.046215705745609],[0.000302207364773944,0.000889927447854432,0.000926735068148214,0.00330379596518966,0.00330379596518966,0.00330379596518966,0.00330379596518966,0.00330379596518966,0.00513507841617878],["Ccl9, Dpep1, Cd74, Adam8, Tlr2, Spp1, Cx3cl1, Ccl2, Prex1, C3ar1, Cxcl2","Ccl9, Dpep1, Cd74, Spp1, Cx3cl1, Ccl2, Prex1, C3ar1, Cxcl2","Col3a1, Bgn, Mamdc2, Tgm2, Thbs1","Col1a1, Serac1, Itgb3, Col17a1, Mmp19, Col5a2, Col3a1, Dpt, Col5a1, Spint1, Col1a2, Col4a5, Adamts2, Lamb2, Mia","Axl, Ptpn6, Setd4, Ly96, Ptpn22, Tlr2, Gpnmb, Cx3cl1, Ccl2, Mavs, Thbs1, Syt11","Dpep1, Serpinb9b, Renbp, Thbs1, Serpinb1a, Serpinb1b, Serpinb9g, Kng2, Serpinb9e, Ifi207, Hspa1b","Dpep1, Serpinb9b, Spint1, Renbp, Thbs1, Serpinb1a, Serpinb1b, Serpinb9g, Kng2, Serpinb9e, Ifi207, Hspa1b","Dpep1, Serpinb9b, Spint1, Nos3, Renbp, Thbs1, Amot, Bod1, Serpinb1a, Gchfr, Serpinb1b, Serpinb9g, Kng2, Serpinb9e, Ifi207, Hspa1b","Igfbp4, Wwc1, Ccl9, Itgb3, Xdh, Cd74, Adam8, Ptpn22, Tlr2, Flt1, Gpnmb, Cx3cl1, Cspg4, Mid1, Ccl2, Mturn, Thbs1, Ackr3, P2ry6, Trim30d, Sphk1"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>id<\/th>\n      <th>over_represented_pvalue<\/th>\n      <th>numDEInCat<\/th>\n      <th>numInCat<\/th>\n      <th>term<\/th>\n      <th>ontology<\/th>\n      <th>Expected<\/th>\n      <th>adjP<\/th>\n      <th>FDR<\/th>\n      <th>Genes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollCollapse":true,"pageLength":5,"autoWidth":true,"dom":"Blfrtip","buttons":["copy","csv","excel","pdf","colvis"],"lengthMenu":[[10,25,50,-1],["10","25","50","All"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4,7,8,9]},{"orderable":false,"targets":0}],"order":[],"orderClasses":false,"orderCellsTop":true},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.2 Patched (2022-11-10 r83330)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.2 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+ [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
+ [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+ [1] grid      stats4    tools     stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] cowplot_1.1.1               ngsReports_2.0.3           
+ [3] patchwork_1.1.2             VennDiagram_1.7.3          
+ [5] futile.logger_1.4.3         UpSetR_1.4.0               
+ [7] fgsea_1.24.0                GOplot_1.0.2               
+ [9] RColorBrewer_1.1-3          gridExtra_2.3              
+[11] ggdendro_0.1.23             AnnotationHub_3.6.0        
+[13] BiocFileCache_2.6.1         dbplyr_2.3.1               
+[15] openxlsx_4.2.5.2            ggiraph_0.8.6              
+[17] wasabi_1.0.1                sleuth_0.30.1              
+[19] DT_0.27                     VennDetail_1.14.0          
+[21] msigdb_1.6.0                GSEABase_1.60.0            
+[23] graph_1.76.0                annotate_1.76.0            
+[25] XML_3.99-0.13               pheatmap_1.0.12            
+[27] ggvenn_0.1.9                MetBrewer_0.2.0            
+[29] ggpubr_0.6.0                venn_1.11                  
+[31] viridis_0.6.2               viridisLite_0.4.1          
+[33] tximeta_1.16.1              tximport_1.26.1            
+[35] goseq_1.50.0                geneLenDataBase_1.34.0     
+[37] BiasedUrn_2.0.9             org.Mm.eg.db_3.16.0        
+[39] EnsDb.Mmusculus.v79_2.99.0  ensembldb_2.22.0           
+[41] AnnotationFilter_1.22.0     GenomicFeatures_1.50.4     
+[43] AnnotationDbi_1.60.0        biomaRt_2.54.0             
+[45] edgeR_3.40.2                limma_3.54.1               
+[47] DESeq2_1.38.3               SummarizedExperiment_1.28.0
+[49] Biobase_2.58.0              MatrixGenerics_1.10.0      
+[51] matrixStats_0.63.0          GenomicRanges_1.50.2       
+[53] GenomeInfoDb_1.34.9         IRanges_2.32.0             
+[55] S4Vectors_0.36.1            BiocGenerics_0.44.0        
+[57] corrplot_0.92               lubridate_1.9.2            
+[59] forcats_1.0.0               purrr_1.0.1                
+[61] readr_2.1.4                 tidyverse_2.0.0            
+[63] stringr_1.5.0               tidyr_1.3.0                
+[65] scales_1.2.1                data.table_1.14.8          
+[67] readxl_1.4.2                tibble_3.1.8               
+[69] magrittr_2.0.3              reshape2_1.4.4             
+[71] ggplot2_3.4.1               dplyr_1.1.0.9000           
+[73] workflowr_1.7.0            
+
+loaded via a namespace (and not attached):
+  [1] rappdirs_0.3.3                rtracklayer_1.58.0           
+  [3] bit64_4.0.5                   knitr_1.42                   
+  [5] DelayedArray_0.24.0           KEGGREST_1.38.0              
+  [7] RCurl_1.98-1.10               generics_0.1.3               
+  [9] callr_3.7.3                   lambda.r_1.2.4               
+ [11] RSQLite_2.3.0                 bit_4.0.5                    
+ [13] tzdb_0.3.0                    xml2_1.3.3                   
+ [15] httpuv_1.6.9                  xfun_0.37                    
+ [17] hms_1.1.2                     jquerylib_0.1.4              
+ [19] evaluate_0.20                 promises_1.2.0.1             
+ [21] fansi_1.0.4                   restfulr_0.0.15              
+ [23] progress_1.2.2                DBI_1.1.3                    
+ [25] geneplotter_1.76.0            htmlwidgets_1.6.1            
+ [27] ellipsis_0.3.2                crosstalk_1.2.0              
+ [29] backports_1.4.1               vctrs_0.5.2.9000             
+ [31] abind_1.4-5                   cachem_1.0.7                 
+ [33] withr_2.5.0                   GenomicAlignments_1.34.0     
+ [35] prettyunits_1.1.1             lazyeval_0.2.2               
+ [37] crayon_1.5.2                  pkgconfig_2.0.3              
+ [39] labeling_0.4.2                nlme_3.1-162                 
+ [41] ProtGenerics_1.30.0           rlang_1.0.6.9000             
+ [43] lifecycle_1.0.3               filelock_1.0.2               
+ [45] cellranger_1.1.0              rprojroot_2.0.3              
+ [47] Matrix_1.5-3                  carData_3.0-5                
+ [49] Rhdf5lib_1.20.0               zoo_1.8-11                   
+ [51] whisker_0.4.1                 processx_3.8.0               
+ [53] png_0.1-8                     rjson_0.2.21                 
+ [55] bitops_1.0-7                  getPass_0.2-2                
+ [57] rhdf5filters_1.10.0           pander_0.6.5                 
+ [59] Biostrings_2.66.0             blob_1.2.3                   
+ [61] rstatix_0.7.2                 ggsignif_0.6.4               
+ [63] memoise_2.0.1                 plyr_1.8.8                   
+ [65] zlibbioc_1.44.0               compiler_4.2.2               
+ [67] BiocIO_1.8.0                  Rsamtools_2.14.0             
+ [69] cli_3.6.0                     XVector_0.38.0               
+ [71] ps_1.7.2                      formatR_1.14                 
+ [73] MASS_7.3-58.2                 mgcv_1.8-41                  
+ [75] tidyselect_1.2.0              stringi_1.7.12               
+ [77] highr_0.10                    yaml_2.3.7                   
+ [79] locfit_1.5-9.7                sass_0.4.5                   
+ [81] fastmatch_1.1-3               timechange_0.2.0             
+ [83] parallel_4.2.2                rstudioapi_0.14              
+ [85] uuid_1.1-0                    git2r_0.31.0                 
+ [87] farver_2.1.1                  digest_0.6.31                
+ [89] BiocManager_1.30.20           shiny_1.7.4                  
+ [91] Rcpp_1.0.10                   car_3.1-1                    
+ [93] broom_1.0.3                   BiocVersion_3.16.0           
+ [95] later_1.3.0                   httr_1.4.5                   
+ [97] colorspace_2.1-0              fs_1.6.1                     
+ [99] splines_4.2.2                 plotly_4.10.1                
+[101] systemfonts_1.0.4             xtable_1.8-4                 
+[103] jsonlite_1.8.4                futile.options_1.0.1         
+[105] R6_2.5.1                      pillar_1.8.1                 
+[107] htmltools_0.5.4               mime_0.12                    
+[109] glue_1.6.2                    fastmap_1.1.1                
+[111] BiocParallel_1.32.5           interactiveDisplayBase_1.36.0
+[113] codetools_0.2-19              utf8_1.2.3                   
+[115] lattice_0.20-45               bslib_0.4.2                  
+[117] curl_5.0.0                    zip_2.2.2                    
+[119] GO.db_3.16.0                  admisc_0.30                  
+[121] rmarkdown_2.20                munsell_0.5.0                
+[123] rhdf5_2.42.0                  GenomeInfoDbData_1.2.9       
+[125] gtable_0.3.1                 </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
