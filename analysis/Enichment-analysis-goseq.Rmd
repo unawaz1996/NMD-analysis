@@ -1,0 +1,247 @@
+---
+title: "Enichment-analysis-goseq"
+author: "unawaz1996"
+date: "2023-03-16"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# Enrichment analysis using goseq
+
+
+```{r load libraries}
+source("code/libraries.R")
+source("code/functions.R")
+```
+
+```{r load data}
+load("output/limma-matrices.Rda")
+load("output/DEG-limma-results.Rda")
+load("output/DEG-list.Rda")
+```
+
+
+Testing for enrichment within discrete sets of DE genes as defined in the DEG analysis 
+
+# Databases used for testing 
+Data was sourced using the `misigdbr` package. 
+
+## Hallmark gene sets 
+
+## C2 gene set 
+
+## Gene Ontology Gene set 
+
+
+# Enrichment in the DE Gene Set 
+- `goseq` is an R package that performs enrichment analysis whilst taking length bias into account. It does so by calculating a Probability Weighting Function (PWF), which gives the probability that a gene will be differentially expressed based on length alone. 
+
+The PWD is calculated by fitting a monotonic spline to the binary data series of differential expression (1 = DE, 0= Not DE) as a function of gene length. 
+The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership. The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data.
+
+Results can be intrepreted as following: 
+
+- `overrpresented p-value`: Over representation in this analysis means that there are more DE genes in categort than expected. P-value relates to the probability of observing this number of DE genes in category by chance
+- `numDEinCat`:  number of DE genes in category
+- `Expected`: Expected number of genes in category
+- `adjP` : Bonferroni adjustment of over represented p-value
+- `FDR`: FDR adjustment of over represented p-value
+
+The first step of analysis using goseq, regardless of the gene-set, is estimation of the probability weight function (PWF) which quantifies the probability of a gene being considered as DE based on a single covariate.
+
+```{r}
+load("/home/neuro/Documents/NMD_analysis/Analysis/Genome/mouse_length.Rda")
+comparisons = c("UPF3B_vs_Control", "UPF3A_vs_Control", 
+                "UPF3A_OE_vs_Control", "DoubleKD_vs_Control", "UPF3A_OE_UPF3B_KD_vs_Control")
+```
+
+
+1. GO terms 
+
+For gene ontology analysis, we will be using the GO summaries method. Essentially, this analysis involves creating a graph for each ontology term, and removing the node `all`, as this redundant. For each GO term, we get the ontology it belongs to, the shortest path back to the root note, the longest path to the root node and whether it GO term is a terminal node. 
+
+
+
+```{r}
+gene_ontologies = list()
+for (c in comparisons){
+    analysis = limma_results %>% dplyr::select(ensembl_gene_id, contains(c)) 
+    colnames(analysis) = gsub(paste0(".", c), "", colnames(analysis))
+    genes = as.integer(analysis$Res == 1  | analysis$Res == -1)
+    not_na = !is.na(genes)
+    names(genes) = analysis$ensembl_gene_id
+    genes = genes[not_na]
+    gene_ont = get_ontologies(genes = genes)
+    gene_ont %<>% as.data.frame() %>% 
+        mutate(Comparison = c(c))
+    gene_ontologies[[paste0(c)]] = gene_ont
+    }
+
+```
+
+### UPF3B 
+```{r}
+gene_ontologies$UPF3B_vs_Control$Genes = sapply(gene_ontologies$UPF3B_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), ",") %>% unlist()
+            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+                unname
+            return(tmp)
+        })
+gene_ontologies$UPF3B_vs_Control$Genes = vapply(gene_ontologies$UPF3B_vs_Control$Genes, paste, collapse = ", ", character(1L))
+
+gene_ontologies$UPF3B_vs_Control  %>% 
+    dplyr::select(-c("Comparison",  contains("Sig"), EnsemblID, shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in UPF3B KD compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+```{r}
+terms = gene_ontologies$UPF3B_vs_Control %>% 
+    dplyr::rename(ID = id, Category = ontology, adj_pval = adjP)
+genes = DEGenes$UPF3B_vs_Control %>% 
+    dplyr::select(gene, contains("UPF3B_vs_Control")) %>% 
+    dplyr::rename(ID = gene, logFC = Coef.UPF3B_vs_Control)
+goplot_data = circle_dat(terms, genes)
+
+processes = unique(goplot_data$term)
+
+genes_of_interest = goplot_data %>% 
+  dplyr::select(genes, logFC) %>% distinct(genes, logFC, .keep_all = TRUE) #%>% 
+  #with(structure(logFC, names = genes))
+
+chord= chord_dat(goplot_data, genes_of_interest, processes)
+GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5, ribbon.col = c("red", "yellow", "orange", "blue", "green", "purple", "pink"), 
+        border.size = 0.25)
+
+```
+
+### UPF3A KD 
+```{r}
+gene_ontologies$UPF3A_vs_Control$Genes = sapply(gene_ontologies$UPF3A_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), ",") %>% unlist()
+            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+                unname
+            return(tmp)
+        })
+gene_ontologies$UPF3A_vs_Control$Genes = vapply(gene_ontologies$UPF3A_vs_Control$Genes, paste, collapse = ", ", character(1L))
+
+gene_ontologies$UPF3A_vs_Control  %>% 
+    dplyr::select(-c("Comparison",  contains("Sig"), EnsemblID, shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in UPF3A KD compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+```{r}
+terms = gene_ontologies$UPF3A_vs_Control %>% 
+    dplyr::rename(ID = id, Category = ontology, adj_pval = adjP)
+genes = DEGenes$UPF3A_vs_Control %>% 
+    dplyr::select(gene, contains("UPF3A_vs_Control")) %>% 
+    dplyr::rename(ID = gene, logFC = Coef.UPF3A_vs_Control)
+goplot_data = circle_dat(terms, genes)
+
+processes = unique(goplot_data$term)
+
+genes_of_interest = goplot_data %>% 
+  dplyr::select(genes, logFC) %>% distinct(genes, logFC, .keep_all = TRUE) #%>% 
+  #with(structure(logFC, names = genes))
+
+chord= chord_dat(goplot_data, genes_of_interest, processes)
+GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5, 
+        border.size = 0.25)
+
+```
+
+### Double KD
+
+```{r}
+gene_ontologies$DoubleKD_vs_Control$Genes = sapply(gene_ontologies$DoubleKD_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), ",") %>% unlist()
+            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+                unname
+            return(tmp)
+        })
+gene_ontologies$DoubleKD_vs_Control$Genes = vapply(gene_ontologies$DoubleKD_vs_Control$Genes, paste, collapse = ", ", character(1L))
+
+gene_ontologies$DoubleKD_vs_Control  %>% 
+    dplyr::select(-c("Comparison",  contains("Sig"), EnsemblID, shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in Double KD compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+### UPF3A OE 
+```{r}
+#gene_ontologies$UPF3A_OE_vs_Control$Genes = sapply(gene_ontologies$UPF3A_OE_vs_Control$EnsemblID, function(x){
+#            tmp = strsplit(as.character(x), ",") %>% unlist()
+#            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+#            tmp = tmp[[1]]
+#            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+#                unname
+#            return(tmp)
+#        })
+#gene_ontologies$UPF3A_OE_vs_Control$Genes = vapply(gene_ontologies$UPF3A_OE_vs_Control$Genes, paste, collapse = ", ", character(1L))
+
+gene_ontologies$UPF3A_OE_vs_Control  %>% 
+    dplyr::select(-c("Comparison",  contains("Sig"),  shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in UPF3A OE compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+### UPF3A OE UPF3B KD 
+```{r}
+gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes = sapply(gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), ",") %>% unlist()
+            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+                unname
+            return(tmp)
+        })
+gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes = vapply(gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control$Genes, paste, collapse = ", ", character(1L))
+
+gene_ontologies$UPF3A_OE_UPF3B_KD_vs_Control  %>% 
+    dplyr::select(-c("Comparison",  contains("Sig"), EnsemblID, shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in UPF3A OE, UPF3B KD compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
