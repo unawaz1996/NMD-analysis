@@ -1,0 +1,392 @@
+---
+title: "Enichment-analysis-fgsea"
+author: "unawaz1996"
+date: "2023-03-16"
+output:
+  html_notebook: default
+  workflowr::wflow_html:
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    autodep = TRUE,
+    eval = TRUE,
+	echo = FALSE,
+	warning = FALSE,
+	message = FALSE
+)
+```
+
+# Fast gene set enrichment analysis 
+```{r load libraries}
+source("code/libraries.R")
+source("code/functions.R")
+```
+
+```{r}
+theme_set(theme_bw())
+panderOptions("table.split.table", Inf)
+panderOptions("table.style", "rmarkdown")
+panderOptions("big.mark", ",")
+```
+
+```{r load data}
+load("output/limma-matrices.Rda")
+load("output/DEG-limma-results.Rda")
+load("output/DEG-list.Rda")
+```
+
+# Datasets
+
+
+
+## Hallmark Gene sets 
+
+```{r}
+hm = msigdbr("Mus musculus", category = "H") %>% 
+  distinct(gs_name, ensembl_gene, .keep_all = TRUE)
+```
+
+```{r}
+c2 =  msigdbr("Mus musculus", category = "C2") %>% 
+  dplyr::filter(gs_subcat == "CP:WIKIPATHWAYS" |
+                          gs_subcat == "CP:KEGG"  | 
+                          gs_subcat == "CP:REACTOME") %>% 
+  distinct(gs_name, ensembl_gene, .keep_all = TRUE)
+
+```
+
+
+```{r}
+load("/home/neuro/Documents/NMD_analysis/Analysis/Data/MSigDB/mouse/genesets_msigdbr.Rda")
+```
+
+
+Fast Gene Set Enrichment Analysis implements a fast version of the gsea algorithm. As a result, more permutations are made to get more fine grained p-values. 
+
+
+`fgsea` results can be intrepreted as following: 
+
+- `ES`: Enrichment score which is calculated based on the rank
+- `NES`: Normalized Enrichment Score 
+
+
+Using the MSigDB genesets as above, we will conduct a fgsea analysis on the sets of interest including KEGG, Wikipathways and Reactome. 
+
+
+```{r}
+fgsea_sets = all_gene_sets %>%
+    dplyr::filter(gs_subcat == "CP:WIKIPATHWAYS" |
+                          gs_subcat == "CP:KEGG"  | 
+                          gs_subcat == "CP:REACTOME")
+
+```
+
+```{r include = FALSE}
+fgsea_res = run_fgsea(v = v,  contrasts = contrasts, design = design, idx = fgsea_sets)
+```
+
+
+```{r}
+sigRes = list()
+
+sigRes[["UPF3B_KD_vs_Control"]] = fgsea_res$UPF3B_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes[["UPF3A_KD_vs_Control"]] = fgsea_res$UPF3A_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes[["UPF3A_OE_vs_Control"]] = fgsea_res$UPF3A_OE_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes[["DoubleKD_vs_Control"]] = fgsea_res$DoubleKD_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes[["UPF3A_OE_UPF3B_KD_vs_Control"]] = fgsea_res$UPF3A_OE_UPF3B_KD_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+```
+
+
+# UPF3B vs Knockdown results 
+
+```{r}
+fgsea_res$UPF3B_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="GSEA results for UPF3B KD compared to controls",
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+```{r}
+gsSizes = bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(DEGenes$UPF3B_vs_Control, Res.UPF3B_vs_Control != 0)$ensembl_gene_id
+      ),
+    de_size = vapply(de_id, length, integer(1))
+  )
+
+```
+
+```{r fig.height=15, fig.width=10, fig.cap="*UpSet plot indicating distribution of DE genes within all significant gene sets. Gene sets were restricted to those with an FDR < 0.05 and at least 5 DE genes*"}
+sigRes$UPF3B_KD_vs_Control %>% 
+  dplyr::rename("gs_name" = fgsea.Geneset) %>%
+  left_join(gsSizes) %>%
+  dplyr::filter(de_size >= 5, fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>% 
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+```
+
+
+```{r}
+#upset(fromList(enrich_GSEA),  order.by = "freq")
+```
+
+# Gene sets enrichment in multiple comparisons 
+```{r}
+enrich_GSEA = list("UPF3B KD" = sigRes$UPF3B_KD_vs_Control$fgsea.Geneset, 
+                "UPF3A KD" = sigRes$UPF3A_KD_vs_Control$fgsea.Geneset, 
+                "Double KD" = sigRes$DoubleKD_vs_Control$fgsea.Geneset, 
+                "UPF3A OE" = sigRes$UPF3A_OE_vs_Control$fgsea.Geneset, 
+                "UPF3A OE, UPF3B KD" = sigRes$UPF3A_OE_UPF3B_KD_vs_Control$fgsea.Geneset)
+```
+
+
+## Hallmark sets 
+
+```{r}
+fgsea_sets = all_gene_sets %>%
+    dplyr::filter(gs_cat == "H")
+fgsea_resH = run_fgsea(v = v,  contrasts = contrasts, design = design, idx = fgsea_sets)
+
+```
+
+```{r}
+sigRes_H = list()
+
+sigRes_H[["UPF3B_KD_vs_Control"]] = fgsea_resH$UPF3B_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes_H[["UPF3A_KD_vs_Control"]] = fgsea_resH$UPF3A_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes_H[["UPF3A_OE_vs_Control"]] = fgsea_resH$UPF3A_OE_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes_H[["DoubleKD_vs_Control"]] = fgsea_resH$DoubleKD_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+
+sigRes_H[["UPF3A_OE_UPF3B_KD_vs_Control"]] = fgsea_resH$UPF3A_OE_UPF3B_KD_vs_Control %>% as.data.frame %>%
+    dplyr::filter(fgsea.padj < 0.05) 
+```
+
+## UPF3B vs Controls 
+
+```{r}
+bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(DEGenes$UPF3B_vs_Control, Res.UPF3B_vs_Control != 0)$ensembl_gene_id
+      ),de_size = vapply(de_id, length, integer(1))) %>% 
+  right_join(dplyr::rename(sigRes_H$UPF3B_KD_vs_Contro, "gs_name" = fgsea.Geneset)) %>% 
+  dplyr::filter(fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>%
+   mutate(gs_name = str_remove(gs_name, "HALLMARK_")) %>%
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+
+```
+
+
+
+## UPF3A vs Controls 
+
+```{r}
+bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(limma_results, Res.UPF3A_vs_Control != 0)$ensembl_gene_id
+      ),
+    de_size = vapply(de_id, length, integer(1))
+  ) %>% right_join( dplyr::rename(sigRes_H$UPF3A_KD_vs_Control, "gs_name" = fgsea.Geneset)) %>% 
+  dplyr::filter(fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>%
+   mutate(gs_name = str_remove(gs_name, "HALLMARK_")) %>%
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+
+```
+## Double KD vs Controls 
+
+```{r}
+bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(DEGenes$DoubleKD_vs_Control, Res.DoubleKD_vs_Control != 0)$ensembl_gene_id
+      ),
+    de_size = vapply(de_id, length, integer(1))
+  ) %>% right_join( dplyr::rename(sigRes_H$DoubleKD_vs_Control, "gs_name" = fgsea.Geneset)) %>% 
+  dplyr::filter(fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>%
+   mutate(gs_name = str_remove(gs_name, "HALLMARK_")) %>%
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+```
+
+## UPF3A OE vs Controls 
+
+```{r}
+bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(limma_results, Res.UPF3A_OE_vs_Control != 0)$ensembl_gene_id
+      ),
+    de_size = vapply(de_id, length, integer(1))
+  ) %>% right_join( dplyr::rename(sigRes_H$UPF3A_OE_vs_Control, "gs_name" = fgsea.Geneset)) %>% 
+  dplyr::filter(fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>%
+   mutate(gs_name = str_remove(gs_name, "HALLMARK_")) %>%
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+
+
+```
+## UPF3A OE, UPF3B KD
+```{r}
+bind_rows(hm, c2) %>% 
+  dplyr::select(gs_name, gene_symbol, ensembl_gene) %>% 
+  chop(c(gene_symbol, ensembl_gene)) %>%
+  mutate(
+    gs_size = vapply(gene_symbol, length, integer(1)),
+    de_id = lapply(
+      X = ensembl_gene, 
+      FUN = intersect, 
+      y = dplyr::filter(limma_results, Res.UPF3A_OE_UPF3B_KD_vs_Control != 0)$ensembl_gene_id
+      ),
+    de_size = vapply(de_id, length, integer(1))
+  ) %>% right_join( dplyr::rename(sigRes_H$UPF3A_OE_UPF3B_KD_vs_Contro, "gs_name" = fgsea.Geneset)) %>% 
+  dplyr::filter(fgsea.padj  < 0.05) %>%
+  dplyr::select(gs_name, de_id) %>%
+  unnest(de_id) %>%
+   mutate(gs_name = str_remove(gs_name, "HALLMARK_")) %>%
+  split(f = .$gs_name) %>% 
+  lapply(magrittr::extract2, "de_id") %>% 
+  fromList() %>% 
+  upset(
+    nsets = length(.), 
+    nintersects = 20,
+    order.by = "freq", 
+    mb.ratio = c(0.6, 0.4),
+    sets.x.label = "Number Of DE Genes"
+    )
+
+
+```
+
+## Gene sets enriched in all comparisons 
+
+```{r}
+enrich_H = list("UPF3B KD" = sigRes_H$UPF3B_KD_vs_Control$fgsea.Geneset, 
+                "UPF3A KD" = sigRes_H$UPF3A_KD_vs_Control$fgsea.Geneset, 
+                "Double KD" = sigRes_H$DoubleKD_vs_Control$fgsea.Geneset, 
+                "UPF3A OE" = sigRes_H$UPF3A_OE_vs_Control$fgsea.Geneset, 
+                "UPF3A OE, UPF3B KD" = sigRes_H$UPF3A_OE_UPF3B_KD_vs_Control$fgsea.Geneset)
+```
+
+
+```{r}
+upset(fromList(enrich_H),  order.by = "freq")
+```
+```{r}
+inter_data = upset(fromList(enrich_H),  order.by = "freq")
+```
+
+```{r fig.height=10, fig.width=10}
+sigRes_H_summary = lapply(sigRes_H, function(x) { x %>% dplyr::select(fgsea.Geneset, fgsea.NES) })
+sigRes_H_summary = lapply(sigRes_H_summary, function(x)( x %>%  with(structure(fgsea.NES, names=fgsea.Geneset))))
+
+sigRes_H_summary %>% do.call(rbind, .) %>% pheatmap(border_color = "white", cellheight =15, cellwidth = 15, scale = "none")
+
+
+```
+
