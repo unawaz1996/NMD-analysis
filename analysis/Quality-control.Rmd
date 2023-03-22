@@ -1,0 +1,129 @@
+---
+title: "Quality-control"
+author: "unawaz1996"
+date: "2023-03-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# Quality Assessment of NMD RNA-seq data
+
+## Set-up
+
+```{r}
+source("code/libraries.R")
+```
+
+```{r}
+twoCols <- c(rgb(0.8, 0.1, 0.1), rgb(0.2, 0.2, 0.8))
+```
+
+In order to perform QC, an EnsDB object was obtained using the AnnotationHub package. This provided the GC content and length for each of the transcripts contained in the release. 
+
+Metadata for each fastq file was also loaded. Reads were provided as paired-end reads, with n = 3 samples for each genotype. 
+
+# Raw data 
+
+## Library sizes
+
+Library sizes for unprocessed data ranged between 86,178,215 and 129,449,694 reads.
+
+```{r}
+rawFqc <- list.files(
+    path = "data/fastqc/Raw",
+    pattern = "zip",
+    full.names = TRUE
+    ) %>%
+    FastqcDataList()
+```
+
+
+```{r}
+r1 <- grepl("_1", fqName(rawFqc))
+r2 = grepl("_2", fqName(rawFqc))
+plotReadTotals(rawFqc[r1], barCols = twoCols)
+```
+
+
+
+## GC content 
+
+In poly(A) selected RNA-seq library preparation methods, the nonuniform coverage of transcripts is a prevalent issue. As poly(A) tail only occers at the 3' end of the mRNA, this can usually result in an overrepresentation of the 3'd end. Bias at the 5′ end of RNA can also happen because of various factors, such as the fragmentation method (the 5′ end of RNA is more stable), reverse transcription from RNA to cDNA and strand-oriented library construction protocol.
+
+GC content allows the exploration of the sequencing coverage and can indicate issues in overrepresentation. It has been observed that either high or low GC content will result in lower depth coverage. 
+
+```{r}
+#gcPlots <- list(
+#    r1 = plotGcContent(
+#        x = rawFqc[r1], 
+#        plotType = "line",
+#        gcType = "Transcriptome",
+#        species = "Mmusculus"
+#    ),
+#    r2 = plotGcContent(
+#        x = rawFqc[!r1], 
+#        plotType = "line",
+#        gcType = "Transcriptome",
+#        species = "Mmusculus"
+#    )
+#)
+#lg <- get_legend(gcPlots$r2 + theme(legend.position = "bottom")) 
+#plot_grid(
+#    plot_grid(
+#        r1 = gcPlots$r1 + 
+#            ggtitle("R1: GC Distribution", subtitle = c()) +
+#            theme(legend.position = "none"),
+#        r2 = gcPlots$r2 + 
+#            ggtitle("R2: GC Distribution", subtitle = c()) +
+#            theme(legend.position = "none")
+#    ),
+#    lg = lg,
+#    nrow = 2,
+#    rel_heights = c(5,2)
+#)
+
+```
+
+
+# Aligned data 
+
+Trimmed reads were: 
+ 1. Aligned using Salmon to a transcriptome 
+
+## Genotype checking 
+
+```{r, fig.height = 4}
+#group.labs <- c("Control", "UPF3A KD", "UPF3A OE", "UPF3B KD", "Double KD", "UPF3A OE, UPF3B KD")
+#names(group.labs) <- unique(md$Group)
+
+# upf3a
+#txi_genes$abundance["ENSMUSG00000038398",] %>% melt() %>% 
+#    rownames_to_column("sample") %>% cbind(md) %>% 
+#    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
+#    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
+#    facet_grid(~Group, labeller = labeller(Group = group.labs) ) + ylab("tpm") + theme_bw() + xlab("") + 
+#    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170"),
+#                       labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", 
+#                                  "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+#                                  "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
+#    theme(legend.position = "none", axis.text.x=element_blank(),
+#          strip.background =element_rect(fill="#D3D5E3", color = "black"))
+```
+
+```{r fig.height = 4}
+#upf3b 
+#txi_genes$abundance["ENSMUSG00000036572",] %>% melt() %>% 
+#    rownames_to_column("sample") %>% cbind(md) %>% 
+#    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
+#    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
+#    facet_grid(~Group, labeller = labeller(Group = group.labs))  + 
+#    ylab("tpm") + theme_bw() + xlab("") + 
+#    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170")) +
+#    theme(legend.position = "none", axis.text.x=element_blank(),
+#          strip.background =element_rect(fill="#D3D5E3", color = "black"))
+
+```
+ 
+
+## PCA 
