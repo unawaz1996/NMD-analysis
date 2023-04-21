@@ -13,9 +13,9 @@
 
 <meta name="date" content="2023-03-14" />
 
-<title>Quality-control</title>
+<title>Quality Assessment of NMD RNA-seq data</title>
 
-<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -35,10 +35,19 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.27/datatables.js"></script>
+<link href="site_libs/dt-core-1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.12.1/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.12.1/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -233,6 +242,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -356,6 +368,21 @@ div.tocify {
     </li>
   </ul>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Transcript Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="transcript-proprocessing.html">Transcript exploration</a>
+    </li>
+    <li>
+      <a href="Differential-transcript-usage.html">Isoform usage analysis</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -372,9 +399,17 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">Quality-control</h1>
+
+<h1 class="title toc-ignore">Quality Assessment of NMD RNA-seq data</h1>
 <h4 class="author">unawaz1996</h4>
 <h4 class="date">2023-03-14</h4>
 
@@ -384,7 +419,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -395,8 +430,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -405,13 +440,13 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-22
+<strong>Last updated:</strong> 2023-04-21
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>NMD-analysis/</code> <span
@@ -521,30 +556,64 @@ run.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
 </p>
 </div>
-<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Using relative paths to the files within your workflowr
-project makes it easier to run your code on other machines.</p>
+<p>
+Using absolute paths to the files within your workflowr project makes it
+difficult for you and others to run your code on a different machine.
+Change the absolute path(s) below to the suggested relative path(s) to
+make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+absolute
+</th>
+<th style="text-align:left;">
+relative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/Transcript/Thesis_figures/transcript-distribution.svg
+</td>
+<td style="text-align:left;">
+output/Transcript/Thesis_figures/transcript-distribution.svg
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/Transcript/Thesis_figures/transcript-composition.svg
+</td>
+<td style="text-align:left;">
+output/Transcript/Thesis_figures/transcript-composition.svg
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreef2ed11a9d95ca42cad6af51db48c4fb29b4e94c8targetblankf2ed11aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreeb9393bc35269a6a75fb81327deeaaa43cb097739targetblankb9393bca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/f2ed11a9d95ca42cad6af51db48c4fb29b4e94c8" target="_blank">f2ed11a</a>
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/b9393bc35269a6a75fb81327deeaaa43cb097739" target="_blank">b9393bc</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreef2ed11a9d95ca42cad6af51db48c4fb29b4e94c8targetblankf2ed11aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreeb9393bc35269a6a75fb81327deeaaa43cb097739targetblankb9393bca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +623,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/f2ed11a9d95ca42cad6af51db48c4fb29b4e94c8" target="_blank">f2ed11a</a>.
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/b9393bc35269a6a75fb81327deeaaa43cb097739" target="_blank">b9393bc</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -571,20 +640,49 @@ were generated:
 Ignored files:
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/Differential-transcript-usage.nb.html
     Ignored:    analysis/Enichment-analysis-fgsea.nb.html
     Ignored:    analysis/Enichment-analysis-goseq.nb.html
 
 Untracked files:
-    Untracked:  NMD-DEG-limma.xlsx
+    Untracked:  PCA.png
+    Untracked:  PCA_plot.pdf
+    Untracked:  PCA_transcript.png
+    Untracked:  analysis/Differential-transcript-expression.Rmd
+    Untracked:  analysis/Differential-transcript-usage.Rmd
+    Untracked:  analysis/UPF3B_KD.Rmd
+    Untracked:  analysis/figures.Rmd
+    Untracked:  analysis/transcript-preprocessing.Rmd
+    Untracked:  code/QuasR_log_7219053fb51a5.txt
+    Untracked:  code/QuasR_log_74f7f374c3271.txt
+    Untracked:  code/QuasR_log_7a13e31c3d08a.txt
+    Untracked:  code/QuasR_log_7ac9f1cedf971.txt
+    Untracked:  code/QuasR_log_7bbdc44874ffd.txt
+    Untracked:  code/eisaR.R
+    Untracked:  code/external_code/
     Untracked:  data/LTK_Sample Metafile_V3.txt
+    Untracked:  data/Mus_musculus.GRCm39.105__nifs.tsv
     Untracked:  data/fastqc/
+    Untracked:  data/nif_output/
+    Untracked:  data/samples.txt
     Untracked:  output/DEG-limma-results.Rda
     Untracked:  output/DEG-list.Rda
+    Untracked:  output/DEG/
+    Untracked:  output/ISAR/
+    Untracked:  output/QC/
+    Untracked:  output/Transcript/
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_complete.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_1_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_2_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_3_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_nt.fasta
     Untracked:  output/limma-matrices.Rda
 
 Unstaged changes:
     Modified:   analysis/DEG-analysis.Rmd
+    Modified:   analysis/Enichment-analysis-fgsea.Rmd
     Modified:   analysis/_site.yml
+    Modified:   code/functions.R
     Modified:   code/libraries.R
 
 </code></pre>
@@ -636,6 +734,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/b9393bc35269a6a75fb81327deeaaa43cb097739/analysis/Quality-control.Rmd" target="_blank">b9393bc</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-04-21
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/Quality-control.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/unawaz1996/NMD-analysis/650317eae471a13c56bfde58444267c6ba76b080/docs/Quality-control.html" target="_blank">650317e</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-03-22
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/unawaz1996/NMD-analysis/blob/f2ed11a9d95ca42cad6af51db48c4fb29b4e94c8/analysis/Quality-control.Rmd" target="_blank">f2ed11a</a>
 </td>
 <td>
@@ -656,111 +788,706 @@ wflow_publish(c("analysis/index.Rmd",
 </div>
 </div>
 </div>
-<div id="quality-assessment-of-nmd-rna-seq-data" class="section level1">
-<h1>Quality Assessment of NMD RNA-seq data</h1>
 <div id="set-up" class="section level2">
 <h2>Set-up</h2>
-<pre class="r"><code>source(&quot;code/libraries.R&quot;)</code></pre>
-<pre class="r"><code>twoCols &lt;- c(rgb(0.8, 0.1, 0.1), rgb(0.2, 0.2, 0.8))</code></pre>
 <p>In order to perform QC, an EnsDB object was obtained using the
-AnnotationHub package. This provided the GC content and length for each
-of the transcripts contained in the release.</p>
+<code>AnnotationHub</code> package. This provided the GC content and
+length for each of the transcripts contained in the release.</p>
 <p>Metadata for each fastq file was also loaded. Reads were provided as
 paired-end reads, with n = 3 samples for each genotype.</p>
 </div>
+<div id="fastqc-summary" class="section level1">
+<h1>FastQC summary</h1>
+<div id="fastqc-summary-1" class="section level2">
+<h2>FastQC summary</h2>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/fastq-summary-1.png" alt="*Basic statistics summary plot. Figure (a) hsows the summary of the PASS/FAIl flags prior to base quality and adapter trimming. Figure (b) shows the summary of PASS/FAIL flags after quality trimming with trimgalore. Green: PASS; Yellow: FAIL; Red: WARN *" width="576" />
+<p class="caption">
+<em>Basic statistics summary plot. Figure (a) hsows the summary of the
+PASS/FAIl flags prior to base quality and adapter trimming. Figure (b)
+shows the summary of PASS/FAIL flags after quality trimming with
+trimgalore. Green: PASS; Yellow: FAIL; Red: WARN </em>
+</p>
 </div>
-<div id="raw-data" class="section level1">
-<h1>Raw data</h1>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-7-1.png" alt="*Sequence Length distribution of the RNA seq reads (a) before and (b) after quality trimming. Only reads with the base length of &gt;  150bp were retained after quality trimming.*" width="960" />
+<p class="caption">
+<em>Sequence Length distribution of the RNA seq reads (a) before and (b)
+after quality trimming. Only reads with the base length of &gt; 150bp
+were retained after quality trimming.</em>
+</p>
+</div>
+</div>
 <div id="library-sizes" class="section level2">
 <h2>Library sizes</h2>
 <p>Library sizes for unprocessed data ranged between 86,178,215 and
 129,449,694 reads.</p>
-<pre class="r"><code>rawFqc &lt;- list.files(
-    path = &quot;data/fastqc/Raw&quot;,
-    pattern = &quot;zip&quot;,
-    full.names = TRUE
-    ) %&gt;%
-    FastqcDataList()</code></pre>
-<pre class="r"><code>r1 &lt;- grepl(&quot;_1&quot;, fqName(rawFqc))
-r2 = grepl(&quot;_2&quot;, fqName(rawFqc))
-plotReadTotals(rawFqc[r1], barCols = twoCols)</code></pre>
-<p><img src="figure/Quality-control.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-9-1.png" alt="*Total numner 0f reads from each sample (a) before and (b) after quality trimming with trimgalore.*" width="672" />
+<p class="caption">
+<em>Total numner 0f reads from each sample (a) before and (b) after
+quality trimming with trimgalore.</em>
+</p>
+</div>
 </div>
 <div id="gc-content" class="section level2">
 <h2>GC content</h2>
 <p>In poly(A) selected RNA-seq library preparation methods, the
 nonuniform coverage of transcripts is a prevalent issue. As poly(A) tail
-only occers at the 3’ end of the mRNA, this can usually result in an
-overrepresentation of the 3’d end. Bias at the 5′ end of RNA can also
+only occurs at the 3’ end of the mRNA, this can usually result in an
+over-representation of the 3’ end. Bias at the 5′ end of RNA can also
 happen because of various factors, such as the fragmentation method (the
 5′ end of RNA is more stable), reverse transcription from RNA to cDNA
 and strand-oriented library construction protocol.</p>
 <p>GC content allows the exploration of the sequencing coverage and can
 indicate issues in overrepresentation. It has been observed that either
 high or low GC content will result in lower depth coverage.</p>
-<pre class="r"><code>#gcPlots &lt;- list(
-#    r1 = plotGcContent(
-#        x = rawFqc[r1], 
-#        plotType = &quot;line&quot;,
-#        gcType = &quot;Transcriptome&quot;,
-#        species = &quot;Mmusculus&quot;
-#    ),
-#    r2 = plotGcContent(
-#        x = rawFqc[!r1], 
-#        plotType = &quot;line&quot;,
-#        gcType = &quot;Transcriptome&quot;,
-#        species = &quot;Mmusculus&quot;
-#    )
-#)
-#lg &lt;- get_legend(gcPlots$r2 + theme(legend.position = &quot;bottom&quot;)) 
-#plot_grid(
-#    plot_grid(
-#        r1 = gcPlots$r1 + 
-#            ggtitle(&quot;R1: GC Distribution&quot;, subtitle = c()) +
-#            theme(legend.position = &quot;none&quot;),
-#        r2 = gcPlots$r2 + 
-#            ggtitle(&quot;R2: GC Distribution&quot;, subtitle = c()) +
-#            theme(legend.position = &quot;none&quot;)
-#    ),
-#    lg = lg,
-#    nrow = 2,
-#    rel_heights = c(5,2)
-#)</code></pre>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="trimmed-data" class="section level2">
+<h2>Trimmed data</h2>
+<table>
+<colgroup>
+<col width="5%" />
+<col width="14%" />
+<col width="12%" />
+<col width="12%" />
+<col width="9%" />
+<col width="11%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">names</th>
+<th align="center">Group</th>
+<th align="center">Condition_UPF3B</th>
+<th align="center">Condition_UPF3A</th>
+<th align="center">Label</th>
+<th align="center">Filename</th>
+<th align="center">Raw</th>
+<th align="center">Trimmed</th>
+<th align="center">Discarded</th>
+<th align="center">Retained</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">212</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_A</td>
+<td align="center">212_L4_1.fq.gz</td>
+<td align="center">129449694</td>
+<td align="center">129423518</td>
+<td align="center">0.0002022</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">212</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_A</td>
+<td align="center">212_L4_2.fq.gz</td>
+<td align="center">129449694</td>
+<td align="center">129423518</td>
+<td align="center">0.0002259</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">213</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_A</td>
+<td align="center">213_L4_1.fq.gz</td>
+<td align="center">124647120</td>
+<td align="center">124618959</td>
+<td align="center">0.0001968</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">213</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_A</td>
+<td align="center">213_L4_2.fq.gz</td>
+<td align="center">124647120</td>
+<td align="center">124618959</td>
+<td align="center">0.0001568</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">214</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_A</td>
+<td align="center">214_L4_1.fq.gz</td>
+<td align="center">122589413</td>
+<td align="center">122565286</td>
+<td align="center">0.0001785</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">214</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_A</td>
+<td align="center">214_L4_2.fq.gz</td>
+<td align="center">122589413</td>
+<td align="center">122565286</td>
+<td align="center">0.0002056</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">215</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_A</td>
+<td align="center">215_L4_1.fq.gz</td>
+<td align="center">86178215</td>
+<td align="center">86164704</td>
+<td align="center">0.0002234</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">215</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_A</td>
+<td align="center">215_L4_2.fq.gz</td>
+<td align="center">86178215</td>
+<td align="center">86164704</td>
+<td align="center">0.0002671</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="odd">
+<td align="center">216</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_A</td>
+<td align="center">216_L4_1.fq.gz</td>
+<td align="center">91807145</td>
+<td align="center">91790756</td>
+<td align="center">0.0001893</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">216</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_A</td>
+<td align="center">216_L4_2.fq.gz</td>
+<td align="center">91807145</td>
+<td align="center">91790756</td>
+<td align="center">0.0001951</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">217</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_A</td>
+<td align="center">217_L4_1.fq.gz</td>
+<td align="center">106731239</td>
+<td align="center">106709299</td>
+<td align="center">0.0002528</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="even">
+<td align="center">217</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_A</td>
+<td align="center">217_L4_2.fq.gz</td>
+<td align="center">106731239</td>
+<td align="center">106709299</td>
+<td align="center">0.001988</td>
+<td align="center">0.998</td>
+</tr>
+<tr class="odd">
+<td align="center">218</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_B</td>
+<td align="center">218_L4_1.fq.gz</td>
+<td align="center">109175104</td>
+<td align="center">109150719</td>
+<td align="center">0.0002647</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="even">
+<td align="center">218</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_B</td>
+<td align="center">218_L4_2.fq.gz</td>
+<td align="center">109175104</td>
+<td align="center">109150719</td>
+<td align="center">0.0002736</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="odd">
+<td align="center">219</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_B</td>
+<td align="center">219_L4_1.fq.gz</td>
+<td align="center">99242640</td>
+<td align="center">99216132</td>
+<td align="center">0.0001691</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">219</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_B</td>
+<td align="center">219_L4_2.fq.gz</td>
+<td align="center">99242640</td>
+<td align="center">99216132</td>
+<td align="center">0.000183</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">220</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_B</td>
+<td align="center">220_L4_1.fq.gz</td>
+<td align="center">101245190</td>
+<td align="center">101226023</td>
+<td align="center">0.000212</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">220</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_B</td>
+<td align="center">220_L4_2.fq.gz</td>
+<td align="center">101245190</td>
+<td align="center">101226023</td>
+<td align="center">0.0001361</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="odd">
+<td align="center">221</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_B</td>
+<td align="center">221_L4_1.fq.gz</td>
+<td align="center">114129302</td>
+<td align="center">114107031</td>
+<td align="center">0.0002022</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">221</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_B</td>
+<td align="center">221_L4_2.fq.gz</td>
+<td align="center">114129302</td>
+<td align="center">114107031</td>
+<td align="center">0.0002259</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">222</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_B</td>
+<td align="center">222_L4_1.fq.gz</td>
+<td align="center">101073551</td>
+<td align="center">1.01e+08</td>
+<td align="center">0.0001968</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">222</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_B</td>
+<td align="center">222_L4_2.fq.gz</td>
+<td align="center">101073551</td>
+<td align="center">1.01e+08</td>
+<td align="center">0.0001568</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">223</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_B</td>
+<td align="center">223_L4_1.fq.gz</td>
+<td align="center">94512220</td>
+<td align="center">94324353</td>
+<td align="center">0.0001785</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">223</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_B</td>
+<td align="center">223_L4_2.fq.gz</td>
+<td align="center">94512220</td>
+<td align="center">94324353</td>
+<td align="center">0.0002056</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">224</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_C</td>
+<td align="center">224_L4_1.fq.gz</td>
+<td align="center">104412970</td>
+<td align="center">104385336</td>
+<td align="center">0.0002234</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">224</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">Control</td>
+<td align="center">S2_Vect_C</td>
+<td align="center">224_L4_2.fq.gz</td>
+<td align="center">104412970</td>
+<td align="center">104385336</td>
+<td align="center">0.0002671</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="odd">
+<td align="center">225</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_C</td>
+<td align="center">225_L4_1.fq.gz</td>
+<td align="center">93692109</td>
+<td align="center">93666471</td>
+<td align="center">0.0001893</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">225</td>
+<td align="center">UPF3A_KD</td>
+<td align="center">Control</td>
+<td align="center">Knockdown</td>
+<td align="center">S2_shRNA_C</td>
+<td align="center">225_L4_2.fq.gz</td>
+<td align="center">93692109</td>
+<td align="center">93666471</td>
+<td align="center">0.0001951</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">226</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_C</td>
+<td align="center">226_L4_1.fq.gz</td>
+<td align="center">95761339</td>
+<td align="center">95745148</td>
+<td align="center">0.0002528</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="even">
+<td align="center">226</td>
+<td align="center">UPF3A_OE</td>
+<td align="center">Control</td>
+<td align="center">Overexpression</td>
+<td align="center">S2_cDNA_C</td>
+<td align="center">226_L4_2.fq.gz</td>
+<td align="center">95761339</td>
+<td align="center">95745148</td>
+<td align="center">0.001988</td>
+<td align="center">0.998</td>
+</tr>
+<tr class="odd">
+<td align="center">227</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_C</td>
+<td align="center">227_L4_1.fq.gz</td>
+<td align="center">90236088</td>
+<td align="center">90219573</td>
+<td align="center">0.0002647</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="even">
+<td align="center">227</td>
+<td align="center">UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Control</td>
+<td align="center">T2_Vect_C</td>
+<td align="center">227_L4_2.fq.gz</td>
+<td align="center">90236088</td>
+<td align="center">90219573</td>
+<td align="center">0.0002736</td>
+<td align="center">0.9997</td>
+</tr>
+<tr class="odd">
+<td align="center">228</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_C</td>
+<td align="center">228_L4_1.fq.gz</td>
+<td align="center">92761079</td>
+<td align="center">92741417</td>
+<td align="center">0.0001691</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">228</td>
+<td align="center">UPF3A_KD_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Knockdown</td>
+<td align="center">T2_shRNA_C</td>
+<td align="center">228_L4_2.fq.gz</td>
+<td align="center">92761079</td>
+<td align="center">92741417</td>
+<td align="center">0.000183</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="odd">
+<td align="center">229</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_C</td>
+<td align="center">229_L4_1.fq.gz</td>
+<td align="center">102071888</td>
+<td align="center">102057991</td>
+<td align="center">0.000212</td>
+<td align="center">0.9998</td>
+</tr>
+<tr class="even">
+<td align="center">229</td>
+<td align="center">UPF3A_OE_UPF3B_KD</td>
+<td align="center">Knockdown</td>
+<td align="center">Overexpression</td>
+<td align="center">T2_cDNA_C</td>
+<td align="center">229_L4_2.fq.gz</td>
+<td align="center">102071888</td>
+<td align="center">102057991</td>
+<td align="center">0.0001361</td>
+<td align="center">0.9999</td>
+</tr>
+</tbody>
+</table>
+<p>After adapter trimming, &lt; 1% of reads were discarded.</p>
 </div>
 </div>
-<div id="aligned-data" class="section level1">
-<h1>Aligned data</h1>
-<p>Trimmed reads were: 1. Aligned using Salmon to a transcriptome</p>
+<div id="aligned-data---salmon-quantifications" class="section level1">
+<h1>Aligned data - Salmon quantifications</h1>
+<p>Counts were generated using Salmon. Briefly, an index was generated
+using the GRCm39 build of the mouse transcript with decoys.txt.
+Selective alignment mode was used. The reads were also aligned to the
+human genome to check for genotyping and to ensure no mislabeling
+occurred during any part of the bench work. Counts were imported as
+transcript-level and gene-level using <code>tximport</code> and
+<code>tximeta</code> respectively.</p>
+<p>Annotation data was loaded as an <code>EnsDb</code> object, using
+Ensembl resealse 107. Transcript level gene lengths and GC content was
+converted to gene level values using:</p>
+<ul>
+<li>GC Content: The total GC content divided by the total length of
+transcripts</li>
+<li>Gene Length: The mean transcript length</li>
+</ul>
 <div id="genotype-checking" class="section level2">
 <h2>Genotype checking</h2>
-<pre class="r"><code>#group.labs &lt;- c(&quot;Control&quot;, &quot;UPF3A KD&quot;, &quot;UPF3A OE&quot;, &quot;UPF3B KD&quot;, &quot;Double KD&quot;, &quot;UPF3A OE, UPF3B KD&quot;)
-#names(group.labs) &lt;- unique(md$Group)
-
-# upf3a
-#txi_genes$abundance[&quot;ENSMUSG00000038398&quot;,] %&gt;% melt() %&gt;% 
-#    rownames_to_column(&quot;sample&quot;) %&gt;% cbind(md) %&gt;% 
-#    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
-#    geom_bar(stat=&quot;identity&quot;, width = 4, color = &quot;black&quot;, alpha = 0.9) +
-#    facet_grid(~Group, labeller = labeller(Group = group.labs) ) + ylab(&quot;tpm&quot;) + theme_bw() + xlab(&quot;&quot;) + 
-#    scale_fill_manual(values = c(&quot;#9D5D7C&quot;,  &quot;#8B9488&quot;, &quot;#657FA2&quot;, &quot;#8483AD&quot;, &quot;#8D779E&quot;, &quot;#3A4170&quot;),
-#                       labels = c(&quot;UPF3A_KD_UPF3B_KD&quot; = &quot;Double KD&quot;, &quot;UPF3A_KD&quot; = &quot;UPF3A KD&quot;, 
-#                                  &quot;UPF3B_KD&quot; = &quot;UPF3B KD&quot;, &quot;UPF3A_OE&quot; = &quot;UPF3A OE&quot;, 
-#                                  &quot;UPF3A_OE_UPF3B_KD&quot; = &quot;UPF3A OE UPF3B KD&quot;)) +
-#    theme(legend.position = &quot;none&quot;, axis.text.x=element_blank(),
-#          strip.background =element_rect(fill=&quot;#D3D5E3&quot;, color = &quot;black&quot;))</code></pre>
-<pre class="r"><code>#upf3b 
-#txi_genes$abundance[&quot;ENSMUSG00000036572&quot;,] %&gt;% melt() %&gt;% 
-#    rownames_to_column(&quot;sample&quot;) %&gt;% cbind(md) %&gt;% 
-#    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
-#    geom_bar(stat=&quot;identity&quot;, width = 4, color = &quot;black&quot;, alpha = 0.9) +
-#    facet_grid(~Group, labeller = labeller(Group = group.labs))  + 
-#    ylab(&quot;tpm&quot;) + theme_bw() + xlab(&quot;&quot;) + 
-#    scale_fill_manual(values = c(&quot;#9D5D7C&quot;,  &quot;#8B9488&quot;, &quot;#657FA2&quot;, &quot;#8483AD&quot;, &quot;#8D779E&quot;, &quot;#3A4170&quot;)) +
-#    theme(legend.position = &quot;none&quot;, axis.text.x=element_blank(),
-#          strip.background =element_rect(fill=&quot;#D3D5E3&quot;, color = &quot;black&quot;))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-14-1.png" alt="All samples demonstrated the expected expression patterns, no mislabeling was detected in the dataset." width="960" />
+<p class="caption">
+All samples demonstrated the expected expression patterns, no
+mislabeling was detected in the dataset.
+</p>
+</div>
+</div>
+<div id="filtering" class="section level2">
+<h2>Filtering</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="library-size" class="section level2">
+<h2>Library size</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="counts-assingment-rate" class="section level2">
+<h2>Counts assingment rate</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="total-detected-genes" class="section level2">
+<h2>Total detected genes</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="transcript-level-exploration-of-data" class="section level2">
+<h2>Transcript level exploration of data</h2>
+<pre><code># A tibble: 2 × 3
+  Filter `median(rowMeans)` `sd(rowMeans)`
+  &lt;fct&gt;               &lt;dbl&gt;          &lt;dbl&gt;
+1 before             0.0370           115.
+2 after             13.3              298.</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-21-1.png" alt="*Log10 of the mean TPMs (transcript per million) over all samples before and after filtering out low-expressed transcripts and genes*" width="576" />
+<p class="caption">
+<em>Log10 of the mean TPMs (transcript per million) over all samples
+before and after filtering out low-expressed transcripts and genes</em>
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-23-1.png" alt="*Violin plots showing the distribution of the number of transcripts per gene (in logarithmic scale). Violin width is scaled by the total number of observations while jittered points represent actual observations.*" width="576" />
+<p class="caption">
+<em>Violin plots showing the distribution of the number of transcripts
+per gene (in logarithmic scale). Violin width is scaled by the total
+number of observations while jittered points represent actual
+observations.</em>
+</p>
+</div>
 </div>
 <div id="pca" class="section level2">
 <h2>PCA</h2>
+<div id="transcript-level-pca" class="section level3">
+<h3>transcript level pca</h3>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-24-1.png" alt="*Principal component analysis of gene (left) and transcript (right) level data. PCA was performed on log2 transformed TPMs after filtering for each respective datatype (gene and transcript level). Gene level PCA shows that all samples are clustering closely based on condition, with no impact of library size in PC1 and PC2. Transcript level PCA shows that samples are clustering close to their conditions based on PC1, however one of the samples of the UPF3A OE in UPF3B KD cell line (sample 223), seems to deviate from its condition group and the rest of the data, so needs to be further investigated*" width="960" />
+<p class="caption">
+<em>Principal component analysis of gene (left) and transcript (right)
+level data. PCA was performed on log2 transformed TPMs after filtering
+for each respective datatype (gene and transcript level). Gene level PCA
+shows that all samples are clustering closely based on condition, with
+no impact of library size in PC1 and PC2. Transcript level PCA shows
+that samples are clustering close to their conditions based on PC1,
+however one of the samples of the UPF3A OE in UPF3B KD cell line (sample
+223), seems to deviate from its condition group and the rest of the
+data, so needs to be further investigated</em>
+</p>
+</div>
+<p>To check if the same variation is observed at PC3 in gene level:</p>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-25-1.png" alt="*Principal component analysis of gene level data showing PC2 and PC3. Sample 223 seems to cluster away from its condition group in PC3*" width="576" />
+<p class="caption">
+<em>Principal component analysis of gene level data showing PC2 and PC3.
+Sample 223 seems to cluster away from its condition group in PC3</em>
+</p>
+</div>
+</div>
+<div id="investigating-the-differences-in-samples-at-transcript-level"
+class="section level3">
+<h3>Investigating the differences in samples at transcript level</h3>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-29-1.png" alt="*Correlations between the first three principal components and measured variables at transcript level. Sample conditions were converted to an ordered categorical variable for the purposes of visualisation*" width="672" />
+<p class="caption">
+<em>Correlations between the first three principal components and
+measured variables at transcript level. Sample conditions were converted
+to an ordered categorical variable for the purposes of
+visualisation</em>
+</p>
+</div>
+<p>Transcripts were divided in 10 approximately equal sized bins based
+on increasing length, and 10 approximately equal sized bins based on
+increasing GC content, with the final GC/Length bins being the
+combination 100 bins using both sets. The contribution of each gene to
+PC1 and PC2 was assessed and a t-test performed on each bin.</p>
+<p>If any bin makes a contribution to PC1 the mean will be clearly
+non-zero, whilst if there is no contribution the mean will be near zero.
+In this way, the impact of gene length and GC content on variance within
+the dataset can be assessed.</p>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-30-1.png" alt="*Contribution of each GC/Length Bin to PC1 and PC2. Fill colours indicate the t-statistic, with tranparency denoting significance as -log10(p), using Bonferroni-adjusted p-values. GIven that the cell-line is clearly captured by PC1, the appearance of GC &amp; length artefacts on PC2 is as expected*" width="672" />
+<p class="caption">
+<em>Contribution of each GC/Length Bin to PC1 and PC2. Fill colours
+indicate the t-statistic, with tranparency denoting significance as
+-log10(p), using Bonferroni-adjusted p-values. GIven that the cell-line
+is clearly captured by PC1, the appearance of GC &amp; length artefacts
+on PC2 is as expected</em>
+</p>
+</div>
+</div>
+</div>
+<div id="correlation-of-samples" class="section level2">
+<h2>Correlation of samples</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-31-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-e73b99e6611f7d9abfab" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-e73b99e6611f7d9abfab">{"x":{"filter":"none","vertical":false,"caption":"<caption>For each sample, a mean of its correlation to the other samples was calculated followed by a z-score transformation. In principle, samples that deviate 3 standard deviations away from the mean would be removed.<\/caption>","data":[["212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229"],[0.954734286747732,0.535319230574479,0.826775360096044,-0.821323088684962,0.0408621209623087,0.104786900612033,0.56241047767458,0.16463033904994,0.170966691558411,0.634588998011526,0.277382192530707,-3.47139484798005,0.692749219205917,0.515706887916418,0.244482446503435,-0.361895743984819,-0.631282137678046,-0.439499333115646],[0.804394359198634,1.85538259776234,1.21446816644299,0.100602146627092,-0.122318734007776,0.64345378346285,-0.0513398699649521,0.028159421919556,0.399166289539115,1.16483054573848,0.541942311912305,-2.27633986472193,-0.535863004478317,-0.62535398074132,-0.725044495679846,-0.311916663388157,-1.54524634057724,-0.558976669043756]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>transcript<\/th>\n      <th>gene<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":[],"jsHooks":[]}</script>
+<div id="correlation-of-samples-with-gc-and-transcript-length"
+class="section level3">
+<h3>Correlation of samples with GC and transcript length</h3>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-33-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/Quality-control.Rmd/unnamed-chunk-33-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-34-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="figure" style="text-align: center">
+<img src="figure/Quality-control.Rmd/unnamed-chunk-35-1.png" alt="PCA on logCPM from counts post normalization with cqn. As a result of the normlization, it seems that whilst the overall variation within the dataset has reduced, sample 223 is no longer cluster with its condition group on PC1 and PC2" width="672" />
+<p class="caption">
+PCA on logCPM from counts post normalization with cqn. As a result of
+the normlization, it seems that whilst the overall variation within the
+dataset has reduced, sample 223 is no longer cluster with its condition
+group on PC1 and PC2
+</p>
+</div>
+<!-- # ```{r} -->
+<!-- # ## deseq2 -->
+<!-- # ddsTxi <- DESeqDataSet(se, design = ~Group) -->
+<!-- # vsd <- vst(ddsTxi) -->
+<!-- # DESeq2::plotPCA(vsd, intgroup = "Group") -->
+<!-- #  -->
+<!-- # ``` -->
+<!-- # ```{r} -->
+<!-- # library(EnsDb.Hsapiens.v86) -->
+<!-- # txdf = transcripts(EnsDb.Hsapiens.v86, return.type="DataFrame") -->
+<!-- # tx2gene = as.data.frame(txdf[,c("tx_id","gene_id", "tx_biotype")]) -->
+<!-- # salmon.files = ("/home/neuro/Documents/neurogenetics/alignments/Illumina/RNAseq/mouse/LJ_LTK/Salmon/Salmon_phoenix") -->
+<!-- # salmon = list.files(salmon.files, pattern = "transcripts$", full.names = TRUE) -->
+<!-- # all_files = file.path(salmon, "quant.sf") -->
+<!-- # names(all_files) <- paste(c(212:229)) -->
+<!-- # txi_genes_human  = tximport(all_files, type="salmon", txOut=FALSE, -->
+<!-- #                       countsFromAbundance="scaledTPM", tx2gene = tx2gene, ignoreTxVersion = TRUE, ignoreAfterBar = TRUE) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # txi_genes_human$abundance["ENSG00000169062",] %>% melt() %>% -->
+<!-- #    rownames_to_column("name") %>% cbind(md) %>% -->
+<!-- #    ggplot(aes(x=as.character(names), y= value)) + -->
+<!-- #    geom_bar(stat="identity", color = "black", alpha = 0.9) + -->
+<!-- #    facet_grid(~Group, labeller = labeller(Group = group.labs), scales = "free_x") + ylab("tpm") + theme_bw() + xlab("") + -->
+<!-- #    scale_fill_manual(labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", -->
+<!-- #                                  "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", -->
+<!-- #                                  "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) + -->
+<!-- #    theme(legend.position = "none") + ggtitle("UPF3A expression") -->
+<!-- # ``` -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -769,7 +1496,6 @@ Session information
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
-<pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.2 Patched (2022-11-10 r83330)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 22.04.2 LTS
@@ -787,112 +1513,128 @@ locale:
 [11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
- [1] grid      stats4    tools     stats     graphics  grDevices utils    
- [8] datasets  methods   base     
+ [1] splines   grid      stats4    tools     stats     graphics  grDevices
+ [8] utils     datasets  methods   base     
 
 other attached packages:
- [1] ggrepel_0.9.3               pander_0.6.5               
- [3] msigdbr_7.5.1               cowplot_1.1.1              
- [5] ngsReports_2.0.3            patchwork_1.1.2            
- [7] VennDiagram_1.7.3           futile.logger_1.4.3        
- [9] UpSetR_1.4.0                fgsea_1.24.0               
-[11] GOplot_1.0.2                RColorBrewer_1.1-3         
-[13] gridExtra_2.3               ggdendro_0.1.23            
-[15] AnnotationHub_3.6.0         BiocFileCache_2.6.1        
-[17] dbplyr_2.3.1                openxlsx_4.2.5.2           
-[19] ggiraph_0.8.6               wasabi_1.0.1               
-[21] sleuth_0.30.1               DT_0.27                    
-[23] VennDetail_1.14.0           msigdb_1.6.0               
-[25] GSEABase_1.60.0             graph_1.76.0               
-[27] annotate_1.76.0             XML_3.99-0.13              
-[29] pheatmap_1.0.12             ggvenn_0.1.9               
-[31] MetBrewer_0.2.0             ggpubr_0.6.0               
-[33] venn_1.11                   viridis_0.6.2              
-[35] viridisLite_0.4.1           tximeta_1.16.1             
-[37] tximport_1.26.1             goseq_1.50.0               
-[39] geneLenDataBase_1.34.0      BiasedUrn_2.0.9            
-[41] org.Mm.eg.db_3.16.0         EnsDb.Mmusculus.v79_2.99.0 
-[43] ensembldb_2.22.0            AnnotationFilter_1.22.0    
-[45] GenomicFeatures_1.50.4      AnnotationDbi_1.60.0       
-[47] biomaRt_2.54.0              edgeR_3.40.2               
-[49] limma_3.54.1                DESeq2_1.38.3              
-[51] SummarizedExperiment_1.28.0 Biobase_2.58.0             
-[53] MatrixGenerics_1.10.0       matrixStats_0.63.0         
-[55] GenomicRanges_1.50.2        GenomeInfoDb_1.34.9        
-[57] IRanges_2.32.0              S4Vectors_0.36.1           
-[59] BiocGenerics_0.44.0         corrplot_0.92              
-[61] lubridate_1.9.2             forcats_1.0.0              
-[63] purrr_1.0.1                 readr_2.1.4                
-[65] tidyverse_2.0.0             stringr_1.5.0              
-[67] tidyr_1.3.0                 scales_1.2.1               
-[69] data.table_1.14.8           readxl_1.4.2               
-[71] tibble_3.1.8                magrittr_2.0.3             
-[73] reshape2_1.4.4              ggplot2_3.4.1              
-[75] dplyr_1.1.0.9000            workflowr_1.7.0            
+ [1] cqn_1.44.0                    quantreg_5.94                
+ [3] SparseM_1.81                  preprocessCore_1.60.2        
+ [5] nor1mix_1.3-0                 mclust_6.0.0                 
+ [7] naniar_1.0.0                  glmpca_0.2.0                 
+ [9] broom_1.0.4                   glue_1.6.2                   
+[11] ggfortify_0.4.16              stargazer_5.2.3              
+[13] IsoformSwitchAnalyzeR_2.01.04 pfamAnalyzeR_0.99.0          
+[15] sva_3.46.0                    genefilter_1.80.3            
+[17] mgcv_1.8-42                   nlme_3.1-162                 
+[19] satuRn_1.6.0                  DEXSeq_1.44.0                
+[21] BiocParallel_1.32.6           ggrepel_0.9.3                
+[23] pander_0.6.5                  msigdbr_7.5.1                
+[25] cowplot_1.1.1                 ngsReports_2.0.3             
+[27] patchwork_1.1.2               VennDiagram_1.7.3            
+[29] futile.logger_1.4.3           UpSetR_1.4.0                 
+[31] fgsea_1.24.0                  GOplot_1.0.2                 
+[33] RColorBrewer_1.1-3            gridExtra_2.3                
+[35] ggdendro_0.1.23               AnnotationHub_3.6.0          
+[37] BiocFileCache_2.6.1           dbplyr_2.3.2                 
+[39] openxlsx_4.2.5.2              ggiraph_0.8.7                
+[41] wasabi_1.0.1                  sleuth_0.30.1                
+[43] DT_0.27                       VennDetail_1.14.0            
+[45] msigdb_1.6.0                  GSEABase_1.60.0              
+[47] graph_1.76.0                  annotate_1.76.0              
+[49] XML_3.99-0.14                 pheatmap_1.0.12              
+[51] ggvenn_0.1.10                 MetBrewer_0.2.0              
+[53] ggpubr_0.6.0                  venn_1.11                    
+[55] viridis_0.6.2                 viridisLite_0.4.1            
+[57] tximeta_1.16.1                tximport_1.26.1              
+[59] goseq_1.50.0                  geneLenDataBase_1.34.0       
+[61] BiasedUrn_2.0.9               org.Mm.eg.db_3.16.0          
+[63] EnsDb.Mmusculus.v79_2.99.0    ensembldb_2.22.0             
+[65] AnnotationFilter_1.22.0       GenomicFeatures_1.50.4       
+[67] AnnotationDbi_1.60.2          biomaRt_2.54.1               
+[69] edgeR_3.40.2                  limma_3.54.2                 
+[71] DESeq2_1.38.3                 SummarizedExperiment_1.28.0  
+[73] Biobase_2.58.0                MatrixGenerics_1.10.0        
+[75] matrixStats_0.63.0            GenomicRanges_1.50.2         
+[77] GenomeInfoDb_1.34.9           IRanges_2.32.0               
+[79] S4Vectors_0.36.2              BiocGenerics_0.44.0          
+[81] corrplot_0.92                 lubridate_1.9.2              
+[83] forcats_1.0.0                 purrr_1.0.1                  
+[85] readr_2.1.4                   tidyverse_2.0.0              
+[87] stringr_1.5.0                 tidyr_1.3.0                  
+[89] scales_1.2.1                  data.table_1.14.8            
+[91] readxl_1.4.2                  tibble_3.2.1                 
+[93] magrittr_2.0.3                reshape2_1.4.4               
+[95] ggplot2_3.4.2                 dplyr_1.1.1                  
+[97] workflowr_1.7.0              
 
 loaded via a namespace (and not attached):
   [1] rappdirs_0.3.3                rtracklayer_1.58.0           
-  [3] bit64_4.0.5                   knitr_1.42                   
-  [5] DelayedArray_0.24.0           KEGGREST_1.38.0              
-  [7] RCurl_1.98-1.10               generics_0.1.3               
-  [9] callr_3.7.3                   lambda.r_1.2.4               
- [11] RSQLite_2.3.0                 bit_4.0.5                    
- [13] tzdb_0.3.0                    xml2_1.3.3                   
- [15] httpuv_1.6.9                  xfun_0.37                    
- [17] hms_1.1.2                     jquerylib_0.1.4              
- [19] babelgene_22.9                evaluate_0.20                
- [21] promises_1.2.0.1              fansi_1.0.4                  
- [23] restfulr_0.0.15               progress_1.2.2               
- [25] DBI_1.1.3                     geneplotter_1.76.0           
- [27] htmlwidgets_1.6.1             ellipsis_0.3.2               
- [29] backports_1.4.1               vctrs_0.5.2.9000             
- [31] abind_1.4-5                   cachem_1.0.7                 
- [33] withr_2.5.0                   GenomicAlignments_1.34.0     
- [35] prettyunits_1.1.1             lazyeval_0.2.2               
- [37] crayon_1.5.2                  labeling_0.4.2               
- [39] pkgconfig_2.0.3               nlme_3.1-162                 
- [41] ProtGenerics_1.30.0           rlang_1.0.6.9000             
- [43] lifecycle_1.0.3               filelock_1.0.2               
- [45] cellranger_1.1.0              rprojroot_2.0.3              
- [47] Matrix_1.5-3                  carData_3.0-5                
- [49] Rhdf5lib_1.20.0               zoo_1.8-11                   
- [51] whisker_0.4.1                 processx_3.8.0               
- [53] png_0.1-8                     rjson_0.2.21                 
- [55] bitops_1.0-7                  getPass_0.2-2                
- [57] rhdf5filters_1.10.0           Biostrings_2.66.0            
- [59] blob_1.2.3                    rstatix_0.7.2                
- [61] ggsignif_0.6.4                memoise_2.0.1                
- [63] plyr_1.8.8                    zlibbioc_1.44.0              
- [65] compiler_4.2.2                BiocIO_1.8.0                 
- [67] Rsamtools_2.14.0              cli_3.6.0                    
- [69] XVector_0.38.0                ps_1.7.2                     
- [71] formatR_1.14                  MASS_7.3-58.2                
- [73] mgcv_1.8-41                   tidyselect_1.2.0             
- [75] stringi_1.7.12                highr_0.10                   
- [77] yaml_2.3.7                    locfit_1.5-9.7               
- [79] sass_0.4.5                    fastmatch_1.1-3              
- [81] timechange_0.2.0              parallel_4.2.2               
- [83] rstudioapi_0.14               uuid_1.1-0                   
- [85] git2r_0.31.0                  farver_2.1.1                 
- [87] digest_0.6.31                 BiocManager_1.30.20          
- [89] shiny_1.7.4                   Rcpp_1.0.10                  
- [91] car_3.1-1                     broom_1.0.3                  
- [93] BiocVersion_3.16.0            later_1.3.0                  
- [95] httr_1.4.5                    colorspace_2.1-0             
- [97] fs_1.6.1                      splines_4.2.2                
- [99] plotly_4.10.1                 systemfonts_1.0.4            
-[101] xtable_1.8-4                  jsonlite_1.8.4               
-[103] futile.options_1.0.1          R6_2.5.1                     
-[105] pillar_1.8.1                  htmltools_0.5.4              
-[107] mime_0.12                     glue_1.6.2                   
-[109] fastmap_1.1.1                 BiocParallel_1.32.5          
-[111] interactiveDisplayBase_1.36.0 codetools_0.2-19             
-[113] utf8_1.2.3                    lattice_0.20-45              
-[115] bslib_0.4.2                   curl_5.0.0                   
-[117] zip_2.2.2                     GO.db_3.16.0                 
-[119] admisc_0.30                   rmarkdown_2.20               
-[121] munsell_0.5.0                 rhdf5_2.42.0                 
-[123] GenomeInfoDbData_1.2.9        gtable_0.3.1                 </code></pre>
+  [3] visdat_0.6.0                  bit64_4.0.5                  
+  [5] knitr_1.42                    DelayedArray_0.24.0          
+  [7] hwriter_1.3.2.1               KEGGREST_1.38.0              
+  [9] RCurl_1.98-1.12               generics_0.1.3               
+ [11] callr_3.7.3                   lambda.r_1.2.4               
+ [13] RSQLite_2.3.1                 bit_4.0.5                    
+ [15] tzdb_0.3.0                    xml2_1.3.3                   
+ [17] httpuv_1.6.9                  xfun_0.38                    
+ [19] hms_1.1.3                     jquerylib_0.1.4              
+ [21] babelgene_22.9                evaluate_0.20                
+ [23] promises_1.2.0.1              fansi_1.0.4                  
+ [25] restfulr_0.0.15               progress_1.2.2               
+ [27] DBI_1.1.3                     geneplotter_1.76.0           
+ [29] htmlwidgets_1.6.2             ellipsis_0.3.2               
+ [31] crosstalk_1.2.0               backports_1.4.1              
+ [33] locfdr_1.1-8                  vctrs_0.6.1                  
+ [35] abind_1.4-5                   cachem_1.0.7                 
+ [37] withr_2.5.0                   BSgenome_1.66.3              
+ [39] vroom_1.6.1                   GenomicAlignments_1.34.1     
+ [41] prettyunits_1.1.1             lazyeval_0.2.2               
+ [43] crayon_1.5.2                  labeling_0.4.2               
+ [45] pkgconfig_2.0.3               ProtGenerics_1.30.0          
+ [47] rlang_1.1.0                   lifecycle_1.0.3              
+ [49] MatrixModels_0.5-1            filelock_1.0.2               
+ [51] cellranger_1.1.0              rprojroot_2.0.3              
+ [53] Matrix_1.5-3                  carData_3.0-5                
+ [55] boot_1.3-28.1                 Rhdf5lib_1.20.0              
+ [57] zoo_1.8-11                    whisker_0.4.1                
+ [59] processx_3.8.0                png_0.1-8                    
+ [61] rjson_0.2.21                  bitops_1.0-7                 
+ [63] getPass_0.2-2                 rhdf5filters_1.10.1          
+ [65] Biostrings_2.66.0             blob_1.2.4                   
+ [67] rstatix_0.7.2                 ggsignif_0.6.4               
+ [69] memoise_2.0.1                 plyr_1.8.8                   
+ [71] gdata_2.18.0.1                zlibbioc_1.44.0              
+ [73] compiler_4.2.2                BiocIO_1.8.0                 
+ [75] Rsamtools_2.14.0              cli_3.6.1                    
+ [77] XVector_0.38.0                pbapply_1.7-0                
+ [79] ps_1.7.4                      formatR_1.14                 
+ [81] MASS_7.3-58.3                 tidyselect_1.2.0             
+ [83] stringi_1.7.12                highr_0.10                   
+ [85] yaml_2.3.7                    locfit_1.5-9.7               
+ [87] sass_0.4.5                    fastmatch_1.1-3              
+ [89] timechange_0.2.0              parallel_4.2.2               
+ [91] rstudioapi_0.14               uuid_1.1-0                   
+ [93] git2r_0.31.0                  farver_2.1.1                 
+ [95] digest_0.6.31                 BiocManager_1.30.20          
+ [97] shiny_1.7.4                   Rcpp_1.0.10                  
+ [99] car_3.1-2                     BiocVersion_3.16.0           
+[101] later_1.3.0                   httr_1.4.5                   
+[103] colorspace_2.1-0              fs_1.6.1                     
+[105] statmod_1.5.0                 plotly_4.10.1                
+[107] systemfonts_1.0.4             xtable_1.8-4                 
+[109] jsonlite_1.8.4                futile.options_1.0.1         
+[111] R6_2.5.1                      pillar_1.9.0                 
+[113] htmltools_0.5.5               mime_0.12                    
+[115] fastmap_1.1.1                 interactiveDisplayBase_1.36.0
+[117] codetools_0.2-19              utf8_1.2.3                   
+[119] lattice_0.20-45               bslib_0.4.2                  
+[121] curl_5.0.0                    gtools_3.9.4                 
+[123] zip_2.2.2                     GO.db_3.16.0                 
+[125] survival_3.5-5                admisc_0.31                  
+[127] rmarkdown_2.21                munsell_0.5.0                
+[129] rhdf5_2.42.0                  GenomeInfoDbData_1.2.9       
+[131] gtable_0.3.3                 </code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -946,6 +1688,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {
