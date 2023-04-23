@@ -627,8 +627,8 @@ gene_pca = pca_genes %>%
                                                                    "UPF3A_OE_UPF3B_KD" = "Condition 5")) +
   #scale_size_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 5)) +
   labs(
-    x = glue("PC2 ({percent(pca_genes$sdev[[1]]^2 / sum(pca_genes$sdev^2), 0.1)})"),
-    y = glue("PC3 ({percent(pca_genes$sdev[[2]]^2 / sum(pca_genes$sdev^2), 0.1)})"),
+    x = glue("PC1 ({percent(pca_genes$sdev[[1]]^2 / sum(pca_genes$sdev^2), 0.1)})"),
+    y = glue("PC2 ({percent(pca_genes$sdev[[2]]^2 / sum(pca_genes$sdev^2), 0.1)})"),
     colour = "Group",
     size = "Library Size\n(millions)"
   ) + theme_bw()  + ggtitle("Gene Level")
