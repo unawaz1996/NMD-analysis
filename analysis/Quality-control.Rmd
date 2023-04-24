@@ -569,12 +569,11 @@ gene_info
 
 ## PCA 
 
-### transcript level pca 
 
 ```{r transcript-pca}
 pca = log(assays(se)$abundance[keep,] + 0.05) %>%
   t() %>% 
-  prcomp(scale = FALSE)
+  prcomp(scale = TRUE)
 
 showLabel = nrow(md) <= 18
 trans_pca =  pca %>% 
@@ -589,9 +588,9 @@ trans_pca =  pca %>%
   geom_point() +
   geom_text_repel(aes(label = names), show.legend = FALSE) +
   scale_colour_manual(values = group_cols, 
-                      labels = c("UPF3A_KD_UPF3B_KD" = "Condition 4", "UPF3A_KD" = "Condition 2", 
-                                                                   "UPF3B_KD" = "Condition 1", "UPF3A_OE" = "Condition 3", 
-                                                                   "UPF3A_OE_UPF3B_KD" = "Condition 5")) +
+                      labels = c("UPF3A_KD_UPF3B_KD" = "UPF3 dKD", "UPF3A_KD" = "UPF3A KD", 
+                                                                   "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
   #scale_size_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 5)) +
   labs(
     x = glue("PC1 ({percent(pca$sdev[[1]]^2 / sum(pca$sdev^2), 0.1)})"),
@@ -622,9 +621,9 @@ gene_pca = pca_genes %>%
   geom_point() +
   geom_text_repel(aes(label = names), show.legend = FALSE) +
   scale_colour_manual(values = group_cols, 
-                         labels = c("UPF3A_KD_UPF3B_KD" = "Condition 4", "UPF3A_KD" = "Condition 2", 
-                                                                   "UPF3B_KD" = "Condition 1", "UPF3A_OE" = "Condition 3", 
-                                                                   "UPF3A_OE_UPF3B_KD" = "Condition 5")) +
+                         labels = c("UPF3A_KD_UPF3B_KD" = "UPF3 dKD", "UPF3A_KD" = "UPF3A KD", 
+                                                                   "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
   #scale_size_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 5)) +
   labs(
     x = glue("PC1 ({percent(pca_genes$sdev[[1]]^2 / sum(pca_genes$sdev^2), 0.1)})"),
@@ -781,7 +780,7 @@ Transcripts were divided in 10 approximately equal sized bins based on increasin
 
 If any bin makes a contribution to PC1 the mean will be clearly non-zero, whilst if there is no contribution the mean will be near zero. In this way, the impact of gene length and GC content on variance within the dataset can be assessed. 
 
-```{r fig.cap="*Contribution of each GC/Length Bin to PC1 and PC2. Fill colours indicate the t-statistic, with tranparency denoting significance as -log10(p), using Bonferroni-adjusted p-values. GIven that the cell-line is clearly captured by PC1, the appearance of GC & length artefacts on PC2 is as expected*"}
+```{r fig.cap="*Contribution of each GC/Length Bin to PC1 and PC2. Fill colours indicate the t-statistic, with tranparency denoting significance as -log10(p), using Bonferroni-adjusted p-values.*"}
 mcols(transGR) %>%
   as.data.frame() %>%
   dplyr::filter(tx_id %in% rownames(pca$rotation)) %>%
@@ -858,7 +857,6 @@ gene = rowMeans(log_gene_cor, na.rm = TRUE) %>% scale() %>% as.data.frame() %>%
 
 
 ```{r}
-
 
 cbind(trans,gene) %>% as.data.frame() %>%
   DT::datatable(caption = "For each sample, a mean of its correlation to the other samples was calculated followed by a z-score transformation. In principle, samples that deviate 3 standard deviations away from the mean would be removed.")
@@ -982,6 +980,40 @@ pcaPost$x %>%
 
 
 ```
+
+## Removing sample
+
+```{r}
+tx_df_removed = assays(se)$abundance[,-12]
+pca= log(tx_df_removed[keep,] + 0.05) %>%  
+  t() %>% 
+  prcomp(scale = TRUE)
+  
+pca %>% 
+  tidy() %>% 
+  dplyr::rename(names = row) %>% 
+  left_join(md %>% dplyr::filter(names != "223"), by = "names") %>%
+   dplyr::filter(PC %in% 1:3) %>% 
+  pivot_wider(names_from = "PC", names_prefix = "PC", values_from = "value") %>% 
+  ggplot(
+    aes(PC1, PC2, colour = Group)
+  ) +
+  geom_point() +
+  geom_text_repel(aes(label = names), show.legend = FALSE) +
+  scale_colour_manual(values = group_cols, 
+                      labels = c("UPF3A_KD_UPF3B_KD" = "UPF3 dKD", "UPF3A_KD" = "UPF3A KD", 
+                                                                   "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
+                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
+  #scale_size_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 5)) +
+  labs(
+    x = glue("PC1 ({percent(pca$sdev[[1]]^2 / sum(pca$sdev^2), 0.1)})"),
+    y = glue("PC2 ({percent(pca$sdev[[2]]^2 / sum(pca$sdev^2), 0.1)})"),
+    colour = "Group",
+    size = "Library Size\n(millions)"
+  ) + theme_bw() + ggtitle("Transcript Level")
+
+```
+
 
 <!-- # ```{r} -->
 <!-- # ## deseq2 -->
