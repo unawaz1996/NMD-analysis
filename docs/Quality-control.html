@@ -605,15 +605,15 @@ output/Transcript/Thesis_figures/transcript-composition.svg
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreef5fc094a89d3df7eb828b53421fff6ae42fa37d1targetblankf5fc094a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistree6110b63d1ba586cb64035203369ea8f1230244cdtargetblank6110b63a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/f5fc094a89d3df7eb828b53421fff6ae42fa37d1" target="_blank">f5fc094</a>
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/6110b63d1ba586cb64035203369ea8f1230244cd" target="_blank">6110b63</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreef5fc094a89d3df7eb828b53421fff6ae42fa37d1targetblankf5fc094a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistree6110b63d1ba586cb64035203369ea8f1230244cdtargetblank6110b63a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -623,7 +623,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/f5fc094a89d3df7eb828b53421fff6ae42fa37d1" target="_blank">f5fc094</a>.
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/6110b63d1ba586cb64035203369ea8f1230244cd" target="_blank">6110b63</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -729,6 +729,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/6110b63d1ba586cb64035203369ea8f1230244cd/analysis/Quality-control.Rmd" target="_blank">6110b63</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-04-24
+</td>
+<td>
+wflow_publish("analysis/Quality-control.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/unawaz1996/NMD-analysis/be057f211fab4959f5a2c0a5db98d864490d6e34/docs/Quality-control.html" target="_blank">be057f2</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-04-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1821,8 +1855,6 @@ unawaz1996
 </div>
 <div id="pca" class="section level2">
 <h2>PCA</h2>
-<div id="transcript-level-pca" class="section level3">
-<h3>transcript level pca</h3>
 <div class="figure" style="text-align: center">
 <img src="figure/Quality-control.Rmd/unnamed-chunk-24-1.png" alt="*Principal component analysis of gene (left) and transcript (right) level data. PCA was performed on log2 transformed TPMs after filtering for each respective datatype (gene and transcript level). Gene level PCA shows that all samples are clustering closely based on condition, with no impact of library size in PC1 and PC2. Transcript level PCA shows that samples are clustering close to their conditions based on PC1, however one of the samples of the UPF3A OE in UPF3B KD cell line (sample 223), seems to deviate from its condition group and the rest of the data, so needs to be further investigated*" width="960" />
 <p class="caption">
@@ -1859,6 +1891,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/be057f211fab4959f5a2c0a5db98d864490d6e34/docs/figure/Quality-control.Rmd/unnamed-chunk-24-1.png" target="_blank">be057f2</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-04-24
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/unawaz1996/NMD-analysis/blob/5196f4120527db07aaf6583bc6850638d325cac7/docs/figure/Quality-control.Rmd/unnamed-chunk-24-1.png" target="_blank">5196f41</a>
@@ -1917,7 +1960,6 @@ unawaz1996
 </tr>
 </tbody>
 </table>
-</div>
 </div>
 </div>
 <div id="investigating-the-differences-in-samples-at-transcript-level"
@@ -2055,13 +2097,11 @@ non-zero, whilst if there is no contribution the mean will be near zero.
 In this way, the impact of gene length and GC content on variance within
 the dataset can be assessed.</p>
 <div class="figure" style="text-align: center">
-<img src="figure/Quality-control.Rmd/unnamed-chunk-30-1.png" alt="*Contribution of each GC/Length Bin to PC1 and PC2. Fill colours indicate the t-statistic, with tranparency denoting significance as -log10(p), using Bonferroni-adjusted p-values. GIven that the cell-line is clearly captured by PC1, the appearance of GC &amp; length artefacts on PC2 is as expected*" width="672" />
+<img src="figure/Quality-control.Rmd/unnamed-chunk-30-1.png" alt="*Contribution of each GC/Length Bin to PC1 and PC2. Fill colours indicate the t-statistic, with tranparency denoting significance as -log10(p), using Bonferroni-adjusted p-values.*" width="672" />
 <p class="caption">
 <em>Contribution of each GC/Length Bin to PC1 and PC2. Fill colours
 indicate the t-statistic, with tranparency denoting significance as
--log10(p), using Bonferroni-adjusted p-values. GIven that the cell-line
-is clearly captured by PC1, the appearance of GC &amp; length artefacts
-on PC2 is as expected</em>
+-log10(p), using Bonferroni-adjusted p-values.</em>
 </p>
 </div>
 <p>
@@ -2308,6 +2348,11 @@ unawaz1996
 </table>
 </div>
 </div>
+</div>
+</div>
+<div id="removing-sample" class="section level2">
+<h2>Removing sample</h2>
+<p><img src="figure/Quality-control.Rmd/unnamed-chunk-36-1.png" width="672" style="display: block; margin: auto;" /></p>
 <!-- # ```{r} -->
 <!-- # ## deseq2 -->
 <!-- # ddsTxi <- DESeqDataSet(se, design = ~Group) -->
@@ -2483,7 +2528,6 @@ loaded via a namespace (and not attached):
 [127] rmarkdown_2.21                munsell_0.5.0                
 [129] rhdf5_2.42.0                  GenomeInfoDbData_1.2.9       
 [131] gtable_0.3.3                 </code></pre>
-</div>
 </div>
 </div>
 </div>
