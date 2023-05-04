@@ -2,35 +2,52 @@
 title: "DEG-analysis"
 author: "unawaz1996"
 date: "2023-03-14"
-output: workflowr::wflow_html
+output:
+  html_notebook: default
+  workflowr::wflow_html:
+    code_folding: hide
 editor_options:
+  
   chunk_output_type: console
-  code_folding: hide
 ---
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     autodep = TRUE,
-	echo = TRUE,
+    eval = TRUE,
+	echo = FALSE,
 	warning = FALSE,
 	message = FALSE
 )
 ```
 
-## Introduction
-
-
 ```{r load}
 source("code/plots.R") 
 source("code/functions.R")
 source("code/libraries.R")
+library(biomaRt)
+library(nVennR)
+library(eulerr)
 ```
 
-```{r}
 
+
+# Introduction 
+
+# Count data 
+
+Gene-level count data was retrieved from salmon files by `tximport` into a DGEList object. 
+During this process, genes were removed if 
+
+* They were not considered as detectable (TPM < 0.5 in > 3 samples)
+* They did not contain any annotation 
+
+These filtering steps returned gene-level counts for 10,957 genes. 
+
+```{r}
 # Quality control of genes 
-salmon.files = ("/home/neuro/Documents/NMD_analysis/Analysis/Results/Quantification/Salmon")
+salmon.files = ("/home/neuro/Documents/neurogenetics/alignments/Illumina/RNAseq/mouse/LJ_LTK/Salmon/GR39m_decoy_aware")
 md.files = "data/LTK_Sample Metafile_V3.txt"
 
 # Loading data
@@ -47,51 +64,24 @@ txi_genes <- tximport(all_files, type="salmon", txOut=FALSE,
 
 md = read.table(md.files, header= TRUE) %>%  mutate(files = file.path(salmon, "quant.sf"))
 md$Group = factor(md$Group)
+md$Sample = as.character(md$Sample)
 ```
 
 
-# QC analysis 
-
-## Detection of gene expression 
-
-```{r, fig.height = 4}
-group.labs <- c("Control", "UPF3A KD", "UPF3A OE", "UPF3B KD", "Double KD", "UPF3A OE, UPF3B KD")
-names(group.labs) <- unique(md$Group)
-
-# upf3a
-txi_genes$abundance["ENSMUSG00000038398",] %>% melt() %>% 
-    rownames_to_column("sample") %>% cbind(md) %>% 
-    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
-    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
-    facet_grid(~Group, labeller = labeller(Group = group.labs) ) + ylab("tpm") + theme_bw() + xlab("") + 
-    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170"),
-                       labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", 
-                                  "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
-                                  "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
-    theme(legend.position = "none", axis.text.x=element_blank(),
-          strip.background =element_rect(fill="#D3D5E3", color = "black"))
+```{r}
+group_cols <- hcl.colors(
+  n = length(unique(md$Group)), 
+  palette = "Zissou 1"
+  ) %>%
+  setNames(unique(md$Group))
 ```
 
-```{r fig.height = 4}
-#upf3b 
-txi_genes$abundance["ENSMUSG00000036572",] %>% melt() %>% 
-    rownames_to_column("sample") %>% cbind(md) %>% 
-    ggplot(aes(x=as.character(Sample), y= value, fill = Group)) + 
-    geom_bar(stat="identity", width = 4, color = "black", alpha = 0.9) +
-    facet_grid(~Group, labeller = labeller(Group = group.labs))  + 
-    ylab("tpm") + theme_bw() + xlab("") + 
-    scale_fill_manual(values = c("#9D5D7C",  "#8B9488", "#657FA2", "#8483AD", "#8D779E", "#3A4170")) +
-    theme(legend.position = "none", axis.text.x=element_blank(),
-          strip.background =element_rect(fill="#D3D5E3", color = "black"))
 
-```
 
-## Filtering 
-
-```{r fig.height = 4}
+```{r fig.height = 4, fig.cap="Expression density plots for all samples before and after filtering, showing logCPM values."}
 keep = (rowSums(txi_genes$abundance >= .5 ) >= 3)
 
-txi_genes$counts %>% cpm(log=TRUE) %>%
+exp_den = txi_genes$counts %>% cpm(log=TRUE) %>%
     melt() %>%
     dplyr::filter(is.finite(value)) %>% 
     ggplot(aes(x=value, color = as.character(Var2))) +
@@ -101,8 +91,7 @@ txi_genes$counts %>% cpm(log=TRUE) %>%
     theme_bw() +
     theme(legend.position = "none")
 
-
-txi_genes$counts %>%
+exp_den_filt = txi_genes$counts %>%
     cpm(log=TRUE) %>%
     magrittr::extract(keep,) %>% 
     melt() %>%
@@ -113,9 +102,10 @@ txi_genes$counts %>%
     labs(x = "logCPM", y = "Proportion of Genes") + theme_bw() +
     theme(legend.position = "none")
 
+grid.arrange(exp_den,exp_den_filt, ncol=2 )
+
 ```
 
-Another level of filtering I'd like to do here is remove all genes that don't have an annotation 
 
 ```{r fig.height= 4}
 txi_genes_filtered = txi_genes$counts[keep,] %>%  
@@ -129,28 +119,41 @@ txi_genes_filtered = txi_genes$counts[keep,] %>%
 
 
 ```
+
+# Analysis
+
 ## PCA 
 
 ```{r fig.height=4.5}
-PC = log2(txi_genes$abundance[keep,]  + 10^-6 ) %>%
+pca = log2(txi_genes$abundance[keep,]  + 10^-6 ) %>%
     t() %>% 
     prcomp(scale = TRUE)
 
-PC$x[,1:2] %>% 
+pcaVars <- percent_format(0.1)(summary(pca)$importance["Proportion of Variance",]) 
+
+gene_pca = pca$x[,1:2] %>% 
     as.data.frame()  %>%
     cbind(md) %>%
-    ggplot(aes(PC1, PC2, color = Group, shape = Condition_UPF3B, label = Condition_UPF3B)) +
+    as.tibble() %>%
+    ggplot(aes(PC1, PC2, shape = Condition_UPF3B, label = Condition_UPF3B, color=Group)) +
     geom_point(size = 11.5) +
-    theme_bw() + scale_shape_manual(values = c(16,15)) + labs(shape="UPF3B status", colour= "Samples") +
+    theme_bw() + scale_shape_manual(values = c(0,16)) + labs(shape="UPF3B status", colour= "Samples") +
     theme(axis.title.y = element_text(size = 12), axis.title.x = element_text(size = 12), 
           axis.text = element_text(size = 10)) +
     xlab(paste0("Principal Component 1 (28.1%)")) + ylab("Principal Component 2 (16.6%)") +
-    scale_color_manual(values = c("#874257",  "#8B9488", "#657FA2", "#8483AD", "#C2A8BE", "#3A4170"),
+    scale_color_manual(values = c("#FCC98A","#6E74B4", "#E12F8F","#EA2A5F", "#FD9675", "#2F124B"),
                       labels = c("UPF3A_KD_UPF3B_KD" = "Double KD", "UPF3A_KD" = "UPF3A KD", 
                                                                    "UPF3B_KD" = "UPF3B KD", "UPF3A_OE" = "UPF3A OE", 
-                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD"))
+                                                                   "UPF3A_OE_UPF3B_KD" = "UPF3A OE UPF3B KD")) +
+  labs(x = paste0("PC1 (", pcaVars[["PC1"]], ")"),
+    y = paste0("PC2 (", pcaVars[["PC2"]], ")"))
+
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/Gene_PCA.svg", plot = gene_pca, 
+#       units = c("in"), width = 6.65, height = 5.60)
+
 ```
 
+The principal component analysis was performed using the logCPM values from each sample. Each group appears to be clustering together. UPF3A over-expression is clustering with Controls, whereas the UPF3B KD samples are clustering closely with UPF3A overexpression in UPF3B KD files. 
 
 ## Boxplots of gene expression and library size 
 
@@ -179,6 +182,10 @@ countsSum %>% melt() %>% rownames_to_column("Sample") %>%
 
 # Differential gene expression using limma 
 
+## Model description 
+
+In this analysis, we are interested in seeing how the knockdowns behave differently to controls. Given the quality and clustering of the data, we will perform five pairwise comparisons using `limma` where all conditions (KD/OE) will be compared to controls. 
+
 ```{r}
 y <- DGEList(txi_genes_filtered)
 
@@ -203,6 +210,64 @@ fit = lmFit(v, design) %>%
     contrasts.fit(contrasts) %>% 
     eBayes()
 ```
+
+```{r}
+v$E %>% 
+  as.data.frame() %>% 
+  pivot_longer(
+    cols = everything(), names_to = "Sample", values_to = "logCPM"
+  ) %>% 
+  left_join(md) %>% 
+  group_by(Sample) %>% 
+  mutate(RLE = logCPM - median(logCPM))%>% 
+  ggplot(aes(Sample, RLE, fill = Group)) +
+  geom_boxplot(alpha = 0.9) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  facet_wrap(~Group, scales = "free_x") +
+  scale_fill_manual(values = group_cols) +
+  labs(
+    x = "Sample", fill = "Group"
+  )
+```
+
+
+
+```{r}
+## QC plots - deciding log2FC thresholds 
+results <- decideTests(fit, p.value = 0.05, adjust.method = "fdr", method= "global")
+limma_results = write_fit(fit, results= results, adjust = "fdr") %>% 
+    rownames_to_column("ensembl_gene_id") %>% 
+    mutate(gene = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="SYMBOL",keytype="ENSEMBL", multiVals="first"), 
+           entrez = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="ENTREZID",keytype="ENSEMBL", multiVals="first")) %>% drop_na(entrez)
+
+
+gene_expression_density = data.frame()
+comparisons =c("UPF3B_vs_Control", "UPF3A_vs_Control",  "UPF3A_OE_vs_Control", 
+               "DoubleKD_vs_Control", "UPF3A_OE_UPF3B_KD_vs_Control") 
+
+for (c in comparisons) {
+  sig_genes = limma_results %>% as.data.frame() %>% 
+    dplyr::select(contains("Coef"), contains ("p.value.adj"), contains(c)) %>%
+  dplyr::filter(p.value.adj.UPF3B_vs_Control < 0.05) %>%
+  dplyr::select(contains("Coef")) %>%
+  dplyr::select(contains("UPF3B_vs_Control")) %>% melt()
+  gene_expression_density = rbind(gene_expression_density, sig_genes )
+  
+}
+
+
+  
+
+
+#ggplot(aes(x=Coef.UPF3B_vs_Control)) + 
+ # geom_histogram(aes(y=..density..), colour="black", fill="white") +  
+ # geom_density(alpha=.2, fill="#FF6666") + geom_vline(xintercept =c(log2(1.5), -log2(1.5)),color="red", linetype = "dashed") + 
+#  theme_bw() + ylab("Density")
+
+
+
+```
+
 
 ```{r}
 results <- decideTests(fit, p.value = 0.05, adjust.method = "fdr", method= "global", lfc = log2(1.5))
@@ -233,7 +298,7 @@ DEGenes[["UPF3A_OE_UPF3B_KD_vs_Control"]] <- limma_results %>%
     dplyr::filter(Res.UPF3A_OE_UPF3B_KD_vs_Control != 0, abs(Coef.UPF3A_OE_UPF3B_KD_vs_Control) > log2(1.5)) %>%
     arrange(p.value.UPF3A_OE_UPF3B_KD_vs_Control)
 
-write.xlsx(DEGenes, "NMD-DEG-limma.xlsx")
+#write.xlsx(DEGenes, "NMD-DEG-limma.xlsx")
 
 #save(DEGenes, file="/home/neuro/Documents/NMD_analysis/Analysis/Results/DEGs/DEG-list.Rda")
 
@@ -242,29 +307,64 @@ write.xlsx(DEGenes, "NMD-DEG-limma.xlsx")
 ## Total number of DEGs 
 
 
-
 ```{r}
 summary(results)
 ```
 
 ```{r fig.height=4}
-summary(results) %>% melt() %>% 
+summary_DEG = summary(results) %>% melt() %>% 
     dplyr::filter(Var1 != "NotSig") %>% 
     ggplot(aes(x=reorder(Var2, -value), y = value, fill=Var1)) + 
-    geom_bar(stat = "identity",   colour = "white") + 
+    geom_bar(stat = "identity",   colour = "white", width = .75) + 
     theme_bw() + 
     theme(axis.text.x = element_text(angle = 70,  hjust=1, face = "bold"), 
           legend.position = "bottom", 
-          legend.title= element_blank(), axis.title.y = element_text(size = 12)) + 
-    scale_fill_manual(values = c("#0B032D", "#E56B6F")) +
-    ylab("No. DEGs") + xlab("") + scale_x_discrete(labels=c("UPF3A_KD_UPF3B_KD_vs_Control" = "Double KD", "UPF3A_KD_vs_Control" = "UPF3A KD", 
-                                                            "UPF3B_KD_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
+          legend.title= element_blank(), axis.title.y = element_text(size = 12), 
+          axis.text.y = element_text(size = 12, face = "bold")) + 
+    scale_fill_manual(values = c( "#2F124B","#EA2A5F")) +
+    ylab("# Differentially expressed genes") + xlab("") + scale_x_discrete(labels=c("DoubleKD_vs_Control" = "Double KD", "UPF3A_vs_Control" = "UPF3A KD", 
+                                                            "UPF3B_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
                                                             "UPF3A_OE_UPF3B_KD_vs_Control" = "UPF3A OE UPF3B KD"))
+
+summary_DEG
+
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/total_DEG.svg", plot = summary_DEG, 
+#       units = c("in"), height = 5.54, width = 5.69)
 
 ```
 
 
-After performing pairwise differential gene expression analysis, we can see that majority of all significantly expressed genes in all contrasts are upregulated. Overall, we find that a total of 395 genes are differentially expressed between UPF3B KD and controls. 388 genes are differentially expressed between UPF3A KD vs Controls.
+```{r}
+ratios = data.frame()
+for (c in comparisons){
+  temp = summary(results) %>% 
+    melt() %>% 
+    dplyr::filter(Var2 == c, Var1 != "NotSig") 
+  ratio= temp$value[2]/temp$value[1]
+  ratio = data.frame(Comparisons = c, 
+           ratio = ratio)
+  ratios = rbind(ratios, ratio)
+  }
+ratios
+
+ratios  %>%
+  ggplot(aes(x =Comparisons, y = ratio, fill = Comparisons)) + 
+  geom_bar(stat = "identity",   colour = "white", width = .75) + 
+    theme_classic() + 
+    theme(axis.text.x = element_text(angle = 70,  hjust=1, face = "bold"), 
+          legend.position = "none", 
+          legend.title= element_blank(), axis.title.y = element_text(size = 12), 
+          axis.text.y = element_text(size = 14, face = "bold")) + 
+    scale_fill_manual(values = c("#E12F8F","#6E74B4","#EA2A5F", "#FD9675", "#2F124B")) +
+    ylab("ratio up/down") + xlab("") 
+
+
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/ratio_DEG.svg", plot = ratios, 
+#       units = c("in"), height = 4, width = 5.69)
+
+```
+
+After performing pairwise differential gene expression analysis, we can see that majority of all significantly expressed genes in all contrasts are up-regulated. Overall, we find that a total of 395 genes are differentially expressed between UPF3B KD and controls. 388 genes are differentially expressed between UPF3A KD vs Controls.
 
 
 ## Overlapping DEGs 
@@ -280,48 +380,56 @@ ven <- venndetail(list("UPF3B KD" = DEGenes$UPF3B_vs_Control$gene,
 ```
 
 
+
 ```{r}
-venn(list("UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id, 
+x=list("UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id, 
                        "UPF3A KD" = DEGenes$UPF3A_vs_Control$ensembl_gene_id,
                     "Double KD" = DEGenes$DoubleKD_vs_Control$ensembl_gene_id,
                     "UPF3A OE" = DEGenes$UPF3A_OE_vs_Control$ensembl_gene_id, 
-                  "UPF3A OE, UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$ensembl_gene_id))
+                  "UPF3A OE, UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$ensembl_gene_id)
+
+upset(fromList(x))
 ```
 
 
-```{r}
-#detail(ven) 
-```
-
-```{r}
-#result(ven)
-```
 
 
 ## UPF3B vs Controls 
 
 
 ```{r fig.height=5}
-DEColours <- c("-1" = "#503E5C", "1" = "#874257", "0" = "#D3D5E3")
-volc = limma_results %>%
+DEColours <- c("-1" = "#2F124B","1" = "#EA2A5F",  "0" = "#D3D5E3")
+UPF3B_volc = limma_results %>%
     ggplot(aes(x = Coef.UPF3B_vs_Control, 
-               y = -log10(p.value.UPF3B_vs_Control), 
+               y = -log10(p.value.adj.UPF3B_vs_Control), 
                colour = as.factor(as.character(Res.UPF3B_vs_Control)))) +
-    geom_point(alpha = 0.8, size =1) +
-    scale_colour_manual(values = DEColours) + theme_bw() + 
-    theme(legend.position = "none") +
+    geom_point(alpha = 0.8, size =1.5) +
+    scale_colour_manual(values = DEColours) + theme_classic() + 
+    theme(legend.position = "none", 
+          axis.title.y = element_text(size = 12)) +
     geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
-    geom_hline(yintercept = -log10(limma_results %>% 
-                                       dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
-                                       use_series(p.value.UPF3B_vs_Control) %>% max), 
-               color = "black") +
-    labs(x = "log2 Fold Change", y = "-log10 p-value") +
-    ggtitle("UPF3B KD vs. Control") + xlim(-2.5,2.5) 
+    #geom_hline(yintercept = -log10(limma_results %>% 
+     #                                  dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
+      #                                 use_series(p.value.adj.UPF3B_vs_Control) %>% max), 
+       #        color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 adj p-value") +
+    ggtitle("UPF3B KD vs. Control") + 
+  geom_vline(xintercept = c(-log2(1.5), log2(1.5)), size = 0.5, lty = "dashed", color = "grey60") + xlim(-8.5, 8.5) 
 
 
-my_gg = volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
-    size = 1, hover_nearest = TRUE)
-girafe(ggobj = my_gg)
+#my_gg = UPF3B_volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
+#    size = 1, hover_nearest = TRUE)
+#girafe(ggobj = my_gg)
+```
+
+```{r}
+UPF3B_volc
+```
+
+```{r}
+## volcano plot
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/UPF3B_KD_volcano.svg", plot = volc, 
+#       units = c("in"), width = 5.97, height = 3.63)
 ```
 
 
@@ -329,7 +437,7 @@ girafe(ggobj = my_gg)
 DEGenes$UPF3B_vs_Control %>% 
     dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3B_vs")) %>% 
     dplyr::select(-contains("Res")) %>% 
-    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls",
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls", style = "auto", width = NULL, height = NULL, elementId = NULL,
             options = list(scrollX = TRUE, 
                            scrollCollapse = TRUE, 
                            pageLength = 5, autoWidth = TRUE, 
@@ -339,7 +447,23 @@ DEGenes$UPF3B_vs_Control %>%
                                              c(10,25,50,"All"))))
 ```
 
-Given that previous studies have confirmed UPF3B KD results in a decrease of efficieny of NMD resulting in an increase of upregulated genes, we are interested in seeing how the signifiantly expressed upregulated genes behave in other conditions compared to controls.
+```{r}
+limma_results %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3B_vs")) %>% 
+    dplyr::select(-contains("Res")) %>% 
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls", style = "auto", width = NULL, height = NULL, elementId = NULL,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+
+
+```
+
+Given that previous studies have confirmed UPF3B KD results in a decrease of efficieny of NMD resulting in an increase of upregulated genes, we are interested in seeing how the significantly expressed up-regulated genes behave in other conditions compared to controls.
 
 
 In order to do this, we will create a heatmap visualisaiton. 
@@ -364,7 +488,7 @@ limma_results %>%
         border_color = "white", 
         treeheight_row = 0,
         fontsize = 6,
-        color = colorRampPalette(c("#10c1e5", "#82e0b4","#F9F9F9", "#FBB829", "#FF0066"))(100),
+        color = colorRampPalette(c("#2F124B", "#6E74B4","#F9F9F9", "#FD9675", "#EA2A5F"))(100),
         labels_row = row.names(.), 
         cellwidth = 8
     )
@@ -535,16 +659,6 @@ limma_results %>%
 
 
 
-
-
-
-
-
-
-
-
-
-
 ```{r fig.height =20, out.extra='angle=90'}
 
 rg <- limma_results %>% 
@@ -565,7 +679,7 @@ limma_results %>%
         treeheight_row = 0,
         cutree_rows = 2,
         fontsize = 6,
-        color = colorRampPalette(c("#10c1e5", "#82e0b4","#F9F9F9", "#FBB829", "#FF0066"))(100),
+        color = colorRampPalette(c("#2F124B", "#6E74B4","#F9F9F9", "#FD9675", "#EA2A5F"))(100),
         labels_row = row.names(.),
         cellheight = 10, 
         cellwidth = 12
@@ -736,33 +850,33 @@ Overall the above plots show that there is a strong positive correlation.
 ## UPF3A 
 
 ```{r UPF3A-volc,fig.height = 5}
-
-DEColours <- c("-1" = "#503E5C", "1" = "#874257", "0" = "#D3D5E3")
-volc = limma_results %>%
+UPF3A_volc = limma_results %>%
     ggplot(aes(x = Coef.UPF3A_vs_Control, 
-               y = -log10(p.value.UPF3A_vs_Control), 
+               y = -log10(p.value.adj.UPF3A_vs_Control), 
                colour = as.factor(as.character(Res.UPF3A_vs_Control)))) +
     geom_point(alpha = 0.8, size =0.8) +
-    scale_colour_manual(values = DEColours) + theme_bw() + 
+    scale_colour_manual(values = DEColours) + theme_classic() + 
     theme(legend.position = "none") +
     geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
-    geom_hline(yintercept = -log10(limma_results %>% 
-                                       dplyr::filter(Res.UPF3A_vs_Control != 0) %>% 
-                                       use_series(p.value.UPF3A_vs_Control) %>% max), 
-               color = "black") +
-    labs(x = "log2 Fold Change", y = "-log10 p-value") +
-    ggtitle("UPF3B KD vs. Control") + xlim(-2.5,2.5) 
+    labs(x = "log2 Fold Change", y = "-log10 adj p-value") +
+    ggtitle("UPF3A KD vs. Control") + 
+  geom_vline(xintercept = c(-log2(1.5), log2(1.5)), size = 0.5, lty = "dashed", color = "grey60") + xlim(-8.5, 8.5) 
 
 
-my_gg = volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
-    size = 1, hover_nearest = TRUE)
-girafe(ggobj = my_gg)
+#my_gg = volc + geom_point_interactive(aes(tooltip = gene, data_id = gene), 
+#    size = 1, hover_nearest = TRUE)
+#girafe(ggobj = my_gg)
+```
+
+```{r}
+UPF3A_volc
 ```
 
 
 ```{r}
-DEGenes$UPF3A_vs_Control %>% 
-    dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3A_vs")) %>% 
+limma_results %>% 
+  dplyr::filter(Res.UPF3A_vs_Control != 0) %>%
+    #dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3A_vs")) %>% 
     mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
                                                                                                                                                  caption = "Genes significantly expression in UPF3A KDs relative to Controls",
             options = list(scrollX = TRUE, 
@@ -795,4 +909,134 @@ limma_results %>%
               conf.int = TRUE, add.params = list(color = "blue",
                                                  fill = "lightgray")) + 
     theme_bw() 
+```
+
+
+### UPF3A OE 
+
+```{r}
+DEGenes$UPF3A_OE_vs_Control %>% 
+    dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3B_vs")) %>% 
+    dplyr::select(-contains("Res")) %>% 
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls", style = "auto", width = NULL, height = NULL, elementId = NULL,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+```{r fig.height=30}
+
+rg <- limma_results %>% 
+     dplyr::filter(Res.UPF3A_OE_vs_Control != 0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>% max(abs(.));
+
+limma_results %>% 
+    dplyr::filter(Res.UPF3A_OE_vs_Control != 0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>%
+    pheatmap(,
+        scale="none", 
+        cluster_cols = FALSE,
+        breaks = seq(-rg, rg, length.out = 100),
+        clustering_distance_rows = "euclidean", 
+        border_color = "white", 
+        treeheight_row = 0,
+        fontsize = 6,
+        color = colorRampPalette(c("#2F124B", "#6E74B4","#F9F9F9", "#FD9675", "#EA2A5F"))(100),
+        labels_row = row.names(.), 
+        cellwidth = 8
+    )
+
+```
+
+## UPF3 dKDs 
+
+```{r}
+dKds_volc = limma_results %>%
+    ggplot(aes(x = Coef.DoubleKD_vs_Control, 
+               y = -log10(p.value.adj.DoubleKD_vs_Control), 
+               colour = as.factor(as.character(Res.DoubleKD_vs_Control)))) +
+    geom_point(alpha = 0.8, size =1.5) +
+    scale_colour_manual(values = DEColours) + theme_classic() + 
+    theme(legend.position = "none", 
+          axis.title.y = element_text(size = 12)) +
+    geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
+    #geom_hline(yintercept = -log10(limma_results %>% 
+     #                                  dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
+      #                                 use_series(p.value.adj.UPF3B_vs_Control) %>% max), 
+       #        color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 adj p-value") +
+    ggtitle("UPF3B KD vs. Control") + 
+  geom_vline(xintercept = c(-log2(1.5), log2(1.5)), size = 0.5, lty = "dashed", color = "grey60") + xlim(-8.5, 8.5) 
+
+```
+
+```{r}
+dKds_volc
+```
+
+## UPF3A OE
+
+```{r}
+upf3a_oe_volc = limma_results %>%
+    ggplot(aes(x = Coef.UPF3A_OE_vs_Control, 
+               y = -log10(p.value.adj.UPF3A_OE_vs_Control), 
+               colour = as.factor(as.character(Res.UPF3A_OE_vs_Control)))) +
+    geom_point(alpha = 0.8, size =1.5) +
+    scale_colour_manual(values = DEColours) + theme_classic() + 
+    theme(legend.position = "none", 
+          axis.title.y = element_text(size = 12)) +
+    geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
+    #geom_hline(yintercept = -log10(limma_results %>% 
+     #                                  dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
+      #                                 use_series(p.value.adj.UPF3B_vs_Control) %>% max), 
+       #        color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 adj p-value") +
+    ggtitle("UPF3B KD vs. Control") + 
+  geom_vline(xintercept = c(-log2(1.5), log2(1.5)), size = 0.5, lty = "dashed", color = "grey60") + xlim(-8.5, 8.5) 
+
+```
+
+```{r}
+upf3a_oe_volc
+```
+
+
+## UPF3A OE in UPF3B KD 
+
+```{r}
+upf3a_oe_kd_volc = limma_results %>%
+    ggplot(aes(x = Coef.UPF3A_OE_UPF3B_KD_vs_Control, 
+               y = -log10(p.value.adj.UPF3A_OE_UPF3B_KD_vs_Control), 
+               colour = as.factor(as.character(Res.UPF3A_OE_UPF3B_KD_vs_Control)))) +
+    geom_point(alpha = 0.8, size =1.5) +
+    scale_colour_manual(values = DEColours) + theme_classic() + 
+    theme(legend.position = "none", 
+          axis.title.y = element_text(size = 12)) +
+    geom_hline(yintercept = -log10(0.05), color = "grey60", size = 0.5, lty = "dashed") +
+    #geom_hline(yintercept = -log10(limma_results %>% 
+     #                                  dplyr::filter(Res.UPF3B_vs_Control != 0) %>% 
+      #                                 use_series(p.value.adj.UPF3B_vs_Control) %>% max), 
+       #        color = "black") +
+    labs(x = "log2 Fold Change", y = "-log10 adj p-value") +
+    ggtitle("UPF3B KD vs. Control") + 
+  geom_vline(xintercept = c(-log2(1.5), log2(1.5)), size = 0.5, lty = "dashed", color = "grey60") + xlim(-8.5, 8.5) 
+
+
+```
+
+```{r}
+upf3a_oe_kd_volc
+```
+
+# Data export
+```{r}
+save(DEGenes, file=here::here("output/DEG-list.Rda"))
+save(limma_results, file=here::here("output/DEG-limma-results.Rda"))
+save(results, fit,y,v,contrasts, design, contrasts,  file = here::here("output/limma-matrices.Rda"))
 ```
