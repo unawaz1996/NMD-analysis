@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="unawaz1996" />
+
+<meta name="date" content="2023-03-26" />
+
+<title>Differential-transcript-expression</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">NMD-analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Quality-control.html">Pre-processing</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Differential Expression Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="DEG-analysis.html">DEG analysis</a>
+    </li>
+    <li>
+      <a href="Enichment-analysis-goseq.html">Enrichment analysis using goseq</a>
+    </li>
+    <li>
+      <a href="Enichment-analysis-fgsea.html">Enrichment analysis using fgsea</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Transcript Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Differential-transcript-expression.html">Transcript analysis</a>
+    </li>
+    <li>
+      <a href="Differential-transcript-usage.html">Isoform usage analysis</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/unawaz1996/NMD-analysis">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Differential-transcript-expression</h1>
+<h4 class="author">unawaz1996</h4>
+<h4 class="date">2023-03-26</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-05-10
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>NMD-analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230314code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230314)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230314code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230314)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
+</p>
+</div>
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Using absolute paths to the files within your workflowr project makes it
+difficult for you and others to run your code on a different machine.
+Change the absolute path(s) below to the suggested relative path(s) to
+make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+absolute
+</th>
+<th style="text-align:left;">
+relative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/Transcript/Thesis_figures/total_exp_up.svg
+</td>
+<td style="text-align:left;">
+output/Transcript/Thesis_figures/total_exp_up.svg
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/Transcript/Thesis_figures/total_exp_down.svg
+</td>
+<td style="text-align:left;">
+output/Transcript/Thesis_figures/total_exp_down.svg
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreeb963fdbe655c1c9545672b514ce96f809190280btargetblankb963fdba">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/b963fdbe655c1c9545672b514ce96f809190280b" target="_blank">b963fdb</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreeb963fdbe655c1c9545672b514ce96f809190280btargetblankb963fdba"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/b963fdbe655c1c9545672b514ce96f809190280b" target="_blank">b963fdb</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/Differential-transcript-usage.nb.html
+    Ignored:    analysis/Enichment-analysis-fgsea.nb.html
+    Ignored:    analysis/Enichment-analysis-goseq.nb.html
+
+Untracked files:
+    Untracked:  PCA.png
+    Untracked:  PCA_plot.pdf
+    Untracked:  PCA_transcript.png
+    Untracked:  analysis/Differential-transcript-usage.Rmd
+    Untracked:  analysis/UPF3B_KD.Rmd
+    Untracked:  analysis/transcript-preprocessing.Rmd
+    Untracked:  code/eisaR.R
+    Untracked:  code/external_code/
+    Untracked:  data/LTK_Sample Metafile_V3.txt
+    Untracked:  data/Mus_musculus.GRCm39.105__nifs.tsv
+    Untracked:  data/data.txt
+    Untracked:  data/data2.txt
+    Untracked:  data/fastqc/
+    Untracked:  data/nif_output/
+    Untracked:  data/samples.txt
+    Untracked:  output/DEG-limma-results.Rda
+    Untracked:  output/DEG-list.Rda
+    Untracked:  output/DEG/
+    Untracked:  output/EISA/
+    Untracked:  output/ISAR/
+    Untracked:  output/QC/
+    Untracked:  output/Transcript/
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_complete.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_1_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_2_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_AA_subset_3_of_3.fasta
+    Untracked:  output/isoformSwitchAnalyzeR_isoform_nt.fasta
+    Untracked:  output/limma-matrices.Rda
+    Untracked:  tmp/
+
+Unstaged changes:
+    Modified:   analysis/Enichment-analysis-fgsea.Rmd
+    Modified:   analysis/Enichment-analysis-goseq.Rmd
+    Modified:   analysis/RNA-stability.Rmd
+    Modified:   analysis/_site.yml
+    Modified:   code/functions.R
+    Modified:   code/libraries.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/Differential-transcript-expression.Rmd</code>) and HTML
+(<code>docs/Differential-transcript-expression.html</code>) files. If
+you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/b963fdbe655c1c9545672b514ce96f809190280b/analysis/Differential-transcript-expression.Rmd" target="_blank">b963fdb</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-05-10
+</td>
+<td>
+Add transcript expression
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>Things to do:</p>
+<ul>
+<li>QC plots and normalization
+<ul>
+<li>Transcript level QC - DONE</li>
+<li>PCA - DONE</li>
+<li>BCV and other edgeR associated plots - DONE</li>
+<li>bigPint plot interpretations</li>
+</ul></li>
+<li>DET analysis - all data
+<ul>
+<li>MA plots for all analyses - DONE</li>
+<li>Log fold change distribution - DONE</li>
+<li>Ratio of up/down</li>
+<li>Pvalue histograms - DONE</li>
+<li>NIF enrichment
+<ul>
+<li>How many transcripts that are DE have multiple NIF features -
+DONE</li>
+<li>Is NIF enrichment in a given analysis significant - DONE</li>
+<li>Number of individual NIF in DET analysis - DONE</li>
+<li>Distribution of NIFs in DETs - DONE</li>
+</ul></li>
+<li>How many genes have multiple DETs, and how many of those have
+NIFs?</li>
+</ul></li>
+<li>Overlap of transcripts between UPF3B and UPPF3A and NIF distribution
+of those alignments? - DONE</li>
+<li>Overlap of UPF3B sig only transcripts with UPF3B and NIF
+distribution - DONE</li>
+<li>Overlap of UPF3A sig only transcripts with UPF3A and NIF
+distribution - DONE</li>
+<li>Overlap of UPF3B KD and UPF3A OE in UPF3B KD and NIF distribution?
+–&gt; What is the logFC of overlapping transcripts?</li>
+<li>Overlap of UPF3B KD sig only transcripts in UPF3A OE in UPF3B KD and
+vice versa</li>
+</ul>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div id="set-up" class="section level2">
+<h2>Set-up</h2>
+<p>Transcript-level counts were retrieved using the
+<code>catchSalmon()</code> function from the edgeR package. Once
+retrieved, the counts underwent rigourous QC.</p>
+</div>
+</div>
+<div id="removal-of-outlier-sample" class="section level1">
+<h1>Removal of outlier sample</h1>
+<p>According to the quality control analysis, it was revealed that one
+of the samples was not clustering with its condition group.
+Investigation into GC content, transcript length and library size
+revealed no contribution of these factors. To ensure we are getting
+results that are not skewed we will remove the sample from the
+transcript level analysis.</p>
+<div class="figure" style="text-align: center">
+<img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-6-1.png" alt="*Principal component analysis of transcript level data. PCA was performed on log2 transformed CPM after filtering lowly expressed genes. The PCA shows that samples are clustering close to their conditions based on PC1, however one of the samples of the UPF3A OE in UPF3B KD cell line (sample 223), seems to deviate from its condition group and the rest of the data, so needs to be further investigated*" width="960" />
+<p class="caption">
+<em>Principal component analysis of transcript level data. PCA was
+performed on log2 transformed CPM after filtering lowly expressed genes.
+The PCA shows that samples are clustering close to their conditions
+based on PC1, however one of the samples of the UPF3A OE in UPF3B KD
+cell line (sample 223), seems to deviate from its condition group and
+the rest of the data, so needs to be further investigated</em>
+</p>
+</div>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-7-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] 0.01177187</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-10-1.png" alt="*Biological coeficcient of variation plot against the average abundance of each transcript. The plot shows the square-root estimates of the common, trended and tagwise NB dispersions.*" width="576" />
+<p class="caption">
+<em>Biological coeficcient of variation plot against the average
+abundance of each transcript. The plot shows the square-root estimates
+of the common, trended and tagwise NB dispersions.</em>
+</p>
+</div>
+<div class="figure" style="text-align: center">
+<img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-11-1.png" alt="*Quasi-likelihood dispersion aganist gene abundance. Estimates are shown for raw, tended and squeezed dispersions*" width="576" />
+<p class="caption">
+<em>Quasi-likelihood dispersion aganist gene abundance. Estimates are
+shown for raw, tended and squeezed dispersions</em>
+</p>
+</div>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  14.32   14.32   14.32   14.32   14.32   14.32 </code></pre>
+<div id="checking-normalization-and-qc" class="section level2">
+<h2>Checking normalization and QC</h2>
+<pre><code>$Control_UPF3BKD</code></pre>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>$Control_UPF3AOE</code></pre>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="distribution-of-results" class="section level1">
+<h1>Distribution of results</h1>
+<div id="fold-change-distributions" class="section level2">
+<h2>Fold change distributions</h2>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="det-statistics" class="section level2">
+<h2>DET statistics</h2>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-24-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="distribution-of-nifs" class="section level2">
+<h2>Distribution of NIFs</h2>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="are-det-shared-between-upf3b-kd-and-upf3a-kd"
+class="section level2">
+<h2>Are DET shared between UPF3B KD and UPF3A KD?</h2>
+<pre><code>sign.lfc
+  -1    1 
+1328 1860 </code></pre>
+<pre><code>sign.lfc
+  -1    1 
+ 816 1504 </code></pre>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-34-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-35-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-36-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-37-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div
+id="what-is-the-distribution-between-transcripts-in-upf3b-kd-and-upf3a-oe"
+class="section level3">
+<h3>What is the distribution between transcripts in UPF3B KD and UPF3A
+OE?</h3>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-38-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/Differential-transcript-expression.Rmd/unnamed-chunk-39-1.png" width="672" style="display: block; margin: auto;" /></p>
+<!-- # ```{r} -->
+<!-- #  ## Create manual transcriptome annotation -->
+<!-- # indexDir = file.path("/home/neuro/Documents/NMD_analysis/Analysis/Genome/for_salmon/April_2023/decoy_awaresalmon_index/") -->
+<!-- # fasta = file.path("/home/neuro/Documents/NMD_analysis/Analysis/Genome/for_salmon/Mus_musculus.GRCm39.cdna.all.fa") -->
+<!-- # gtf = file.path("/home/neuro/Documents/NMD_analysis/Analysis/Genome/Mus_musculus.GRCm39.107.gtf.gz") -->
+<!-- # tmp <- tempdir() -->
+<!-- # jsonFile <- file.path(tmp, paste0(basename(indexDir), ".json")) -->
+<!-- #  -->
+<!-- # makeLinkedTxome(indexDir=indexDir, -->
+<!-- #                 source="Ensembl", organism="Mus musculus", -->
+<!-- #                 release="107", genome="GRCm39.107", -->
+<!-- #                 fasta=fasta, gtf=gtf, -->
+<!-- #                 jsonFile=jsonFile) -->
+<!-- #  -->
+<!-- # ``` -->
+<!-- ```{r} -->
+<!-- se <- tximeta(md) -->
+<!-- keep = (rowSums(se@assays@data$abundance >= .5) >= 3) -->
+<!-- dte = se@assays@data$counts[keep,] %>% -->
+<!--   as.data.frame %>% -->
+<!--   rownames_to_column("tx_id") %>% -->
+<!--   set_colnames(basename(colnames(.))) %>% -->
+<!--   dplyr::filter(tx_id %in% trans2Gene$tx_id) %>% melt() -->
+<!--   #pivot_longer(cols = all_of(md$names), names_to = "Mm", values_to = "count") %>% -->
+<!--     left_join(trans2Gene) %>% -->
+<!--     group_by(variable, gene_id) %>% -->
+<!--     summarise(count = sum(value)) %>% -->
+<!--   pivot_wider(names_from = "Mm", values_from = "count") %>% -->
+<!--     dplyr::filter(grepl("ENSMUS", gene_id)) %>% -->
+<!--     as.data.frame() %>% -->
+<!--     column_to_rownames("gene_id") %>% -->
+<!--     DGEList() -->
+<!-- dge$samples %<>% -->
+<!--     mutate(names = rownames(.)) %>% -->
+<!--   dplyr::select(-group) %>% -->
+<!--     left_join(md, by = "names") %>% -->
+<!--     set_rownames(.$names) -->
+<!-- dge$genes <- genesGR[rownames(dge)] %>% -->
+<!--   mcols() -->
+<!-- ``` -->
+<!-- # ```{r transcript-pca} -->
+<!-- #  -->
+<!-- # pca = log(assays(se)$abundance[keep,] + 0.05) %>% -->
+<!-- #   t() %>%  -->
+<!-- #   prcomp(scale = FALSE) -->
+<!-- #  -->
+<!-- # showLabel = nrow(md) <= 18 -->
+<!-- # trans_pca =  pca %>%  -->
+<!-- #   tidy() %>%  -->
+<!-- #   dplyr::rename(names = row) %>%  -->
+<!-- #   left_join(dte$samples, by = "names") %>% -->
+<!-- #    dplyr::filter(PC %in% 1:3) %>%  -->
+<!-- #   pivot_wider(names_from = "PC", names_prefix = "PC", values_from = "value") %>%  -->
+<!-- #   ggplot( -->
+<!-- #     aes(PC1, PC2, colour = Group, size = lib.size/1e6) -->
+<!-- #   ) + -->
+<!-- #   geom_point() + -->
+<!-- #   geom_text_repel(aes(label = names), show.legend = FALSE) + -->
+<!-- #   scale_colour_manual(values = group_cols,  -->
+<!-- #                       labels = c("UPF3A_KD_UPF3B_KD" = "Condition 4", "UPF3A_KD" = "Condition 2",  -->
+<!-- #                                                                    "UPF3B_KD" = "Condition 1", "UPF3A_OE" = "Condition 3",  -->
+<!-- #                                                                    "UPF3A_OE_UPF3B_KD" = "Condition 5")) + -->
+<!-- #   #scale_size_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 5)) + -->
+<!-- #   labs( -->
+<!-- #     x = glue("PC1 ({percent(pca$sdev[[1]]^2 / sum(pca$sdev^2), 0.1)})"), -->
+<!-- #     y = glue("PC2 ({percent(pca$sdev[[2]]^2 / sum(pca$sdev^2), 0.1)})"), -->
+<!-- #     colour = "Group", -->
+<!-- #     size = "Library Size\n(millions)" -->
+<!-- #   ) + theme_bw() + ggtitle("Transcript Level") -->
+<!-- # ``` -->
+<!-- # ```{r} -->
+<!-- # se <- tximeta(md) -->
+<!-- #  -->
+<!-- # ## do manual txi metadata load with Salmon index with decoy aware  -->
+<!-- #  -->
+<!-- # y <- scaleInfReps(se) -->
+<!-- # keep = (rowSums(se@assays@data$abundance >= .5) >= 3) -->
+<!-- # y = y[keep,] -->
+<!-- #  -->
+<!-- # set.seed(1) -->
+<!-- #  -->
+<!-- # results = list() -->
+<!-- # results_obj = list() -->
+<!-- #  -->
+<!-- # for (c in comparisons){ -->
+<!-- #   comp_mtx = y[, y$Group %in% c("Control", c)] -->
+<!-- #   comp_mtx$Group = droplevels(comp_mtx$Group) -->
+<!-- #   comp_mtx = swish(comp_mtx, x="Group") -->
+<!-- #   results[[paste0(c)]] = mcols(comp_mtx) -->
+<!-- #   results_obj[[paste0(c)]] = comp_mtx -->
+<!-- # } -->
+<!-- #  -->
+<!-- #  -->
+<!-- # hist(results$UPF3A_OE$pvalue) -->
+<!-- # ``` -->
+<!-- ```{r} -->
+<!-- #res_trans = results$UPF3B_KD %>% as.data.frame %>% -->
+<!--  # dplyr::filter(qvalue < .05 & abs(log2FC) > log2(1.5)) -->
+<!-- #res_DTU = ASwitchListAnalyzed$isoformFeatures %>%  -->
+<!-- #  dplyr::filter(condition_2 == "UPF3B_KD" & isoform_switch_q_value < 0.05 & abs(dIF) > 0.1 ) %>%  -->
+<!-- #  mutate(ens_gene = mapIds(org.Mm.eg.db, keys=.$gene_name, -->
+<!-- #                             column="ENSEMBL",keytype="SYMBOL", -->
+<!-- #                         multiVals="first")) -->
+<!-- #x = list(DEG = DEGenes$UPF3B_vs_Control$ensembl_gene_id,  -->
+<!-- #         DET = res_trans$gene_id, -->
+<!-- #         DTU = unname(res_DTU$ens_gene)) -->
+<!-- #ggvenn(x[c(1:3)]) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #left_join(tx2gene, by = "tx_id") -->
+<!-- #ntxInfo  <- df %>% -->
+<!-- #    dplyr::distinct(gene_id,.keep_all = TRUE)   -->
+<!-- #biotypeCount <- df %>% dplyr::group_by(Filter) %>% -->
+<!-- #    dplyr::count(tx_biotype) %>% -->
+<!-- #    mutate(sum=sum(n),frac = n / sum(n))  -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #DEGenes$UPF3B_vs_Control %<>%  -->
+<!-- #  dplyr::rename("gene_id" = "ensembl_gene_id") -->
+<!-- #in_all = calculate.overlap(x = list(DEG = DEGenes$UPF3B_vs_Control$ensembl_gene_id,  -->
+<!-- #         DET = res_trans$gene_id, -->
+<!-- #         DTU = unname(res_DTU$ens_gene))) -->
+<!-- #length(in_all$a5) -->
+<!-- #res_trans %>%  -->
+<!-- #  dplyr::filter(gene_id %in% in_all$a5)  -->
+<!-- #DEGenes$UPF3B_vs_Control %>%  -->
+<!-- #  dplyr::filter(gene_id %in% in_all$a5) -->
+<!-- #res_DTU %>%  -->
+<!-- #  dplyr::filter(ens_gene %in% in_all$a5)  -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #results$UPF3B_KD %>% as.data.frame() %>% -->
+<!-- #rownames_to_column("tx_id") %>%  -->
+<!-- #   mutate_at(.vars = "tx_id", .funs = gsub, pattern = "\\.[0-9]*$", replacement = "") %>% -->
+<!-- #  mutate(ens_gene = mapIds(org.Mm.eg.db, keys=.$tx_id, -->
+<!-- #                             column="ENSEMBL",keytype="ENSEMBLTRANS", -->
+<!-- #                         multiVals="first"))  -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- # Overlap between UPF3B genes and transcripts  -->
+<!-- #res_NMD %>%  -->
+<!-- #  mutate_at(.vars = "tx_id", .funs = gsub, pattern = "\\.[0-9]*$", replacement = "")  -->
+<!-- ``` -->
+<!-- ```{r fig.height=6, fig.width=10} -->
+<!-- sig_res_UPF3B = results_UPF3B %>% -->
+<!--   dplyr::filter(qvalue < 0.05, abs(log2FC) > log2(1)) -->
+<!-- dEJ = sig_res_UPF3B %>% -->
+<!--   dplyr::filter(NIF_dEJ == 1) %>% -->
+<!--   dplyr::select(tx_id) -->
+<!-- uORF = sig_res_UPF3B %>% -->
+<!--   dplyr::filter(NIF_uORF == 1) %>% -->
+<!--   dplyr::select(tx_id) -->
+<!-- UTR =  sig_res_UPF3B%>% -->
+<!--   dplyr::filter(NIF_long_3utr == 1) %>% -->
+<!--   dplyr::select(tx_id) -->
+<!-- x = list( "dEJ" = dEJ$tx_id, -->
+<!--           "uORF" = uORF$tx_id, -->
+<!--           "Long 3'UTR" = UTR$tx_id, -->
+<!--           "All transcript" = sig_res_UPF3B$tx_id) -->
+<!-- upset(fromList(x)) -->
+<!-- ``` -->
+<!-- # ```{r} -->
+<!-- # results_UPF3B %>%  -->
+<!-- #   dplyr::filter(qvalue < 0.05) %>%  -->
+<!-- #   dplyr::select(tx_id,log2FC,LENGTH_3utr,diffexpressed) %>%  -->
+<!-- #   ggplot(aes(x=diffexpressed, y=LENGTH_3utr, fill = diffexpressed)) + geom_boxplot() -->
+<!-- # ``` -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre><code>R version 4.2.2 Patched (2022-11-10 r83330)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.2 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+ [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
+ [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+ [1] grid      stats4    tools     stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+  [1] bigPint_1.14.0                naniar_1.0.0                 
+  [3] glmpca_0.2.0                  broom_1.0.4                  
+  [5] glue_1.6.2                    ggfortify_0.4.16             
+  [7] stargazer_5.2.3               tidyquant_1.0.7              
+  [9] quantmod_0.4.21               TTR_0.24.3                   
+ [11] PerformanceAnalytics_2.0.4    xts_0.13.0                   
+ [13] zoo_1.8-11                    ggside_0.2.2                 
+ [15] GeneOverlap_1.34.0            fishpond_2.4.1               
+ [17] IsoformSwitchAnalyzeR_2.01.04 pfamAnalyzeR_0.99.0          
+ [19] sva_3.46.0                    genefilter_1.80.3            
+ [21] mgcv_1.8-42                   nlme_3.1-162                 
+ [23] satuRn_1.6.0                  DEXSeq_1.44.0                
+ [25] BiocParallel_1.32.6           ggrepel_0.9.3                
+ [27] pander_0.6.5                  msigdbr_7.5.1                
+ [29] cowplot_1.1.1                 ngsReports_2.0.3             
+ [31] patchwork_1.1.2               VennDiagram_1.7.3            
+ [33] futile.logger_1.4.3           UpSetR_1.4.0                 
+ [35] fgsea_1.24.0                  GOplot_1.0.2                 
+ [37] RColorBrewer_1.1-3            gridExtra_2.3                
+ [39] ggdendro_0.1.23               AnnotationHub_3.6.0          
+ [41] BiocFileCache_2.6.1           dbplyr_2.3.2                 
+ [43] openxlsx_4.2.5.2              ggiraph_0.8.7                
+ [45] wasabi_1.0.1                  sleuth_0.30.1                
+ [47] DT_0.27                       VennDetail_1.14.0            
+ [49] msigdb_1.6.0                  GSEABase_1.60.0              
+ [51] graph_1.76.0                  annotate_1.76.0              
+ [53] XML_3.99-0.14                 pheatmap_1.0.12              
+ [55] ggvenn_0.1.10                 MetBrewer_0.2.0              
+ [57] ggpubr_0.6.0                  venn_1.11                    
+ [59] viridis_0.6.2                 viridisLite_0.4.1            
+ [61] tximeta_1.16.1                tximport_1.26.1              
+ [63] goseq_1.50.0                  geneLenDataBase_1.34.0       
+ [65] BiasedUrn_2.0.9               org.Mm.eg.db_3.16.0          
+ [67] EnsDb.Mmusculus.v79_2.99.0    ensembldb_2.22.0             
+ [69] AnnotationFilter_1.22.0       GenomicFeatures_1.50.4       
+ [71] AnnotationDbi_1.60.2          biomaRt_2.54.1               
+ [73] edgeR_3.40.2                  limma_3.54.2                 
+ [75] DESeq2_1.38.3                 SummarizedExperiment_1.28.0  
+ [77] Biobase_2.58.0                MatrixGenerics_1.10.0        
+ [79] matrixStats_0.63.0            GenomicRanges_1.50.2         
+ [81] GenomeInfoDb_1.34.9           IRanges_2.32.0               
+ [83] S4Vectors_0.36.2              BiocGenerics_0.44.0          
+ [85] corrplot_0.92                 lubridate_1.9.2              
+ [87] forcats_1.0.0                 purrr_1.0.1                  
+ [89] readr_2.1.4                   tidyverse_2.0.0              
+ [91] stringr_1.5.0                 tidyr_1.3.0                  
+ [93] scales_1.2.1                  data.table_1.14.8            
+ [95] readxl_1.4.2                  tibble_3.2.1                 
+ [97] magrittr_2.0.3                reshape2_1.4.4               
+ [99] ggplot2_3.4.2                 dplyr_1.1.1                  
+[101] workflowr_1.7.0              
+
+loaded via a namespace (and not attached):
+  [1] Hmisc_5.0-1                   ps_1.7.4                     
+  [3] Rsamtools_2.14.0              rprojroot_2.0.3              
+  [5] crayon_1.5.2                  MASS_7.3-58.3                
+  [7] rhdf5filters_1.10.1           backports_1.4.1              
+  [9] rlang_1.1.0                   XVector_0.38.0               
+ [11] callr_3.7.3                   filelock_1.0.2               
+ [13] rjson_0.2.21                  bit64_4.0.5                  
+ [15] parallel_4.2.2                processx_3.8.0               
+ [17] shinydashboard_0.7.2          tidyselect_1.2.0             
+ [19] GenomicAlignments_1.34.1      xtable_1.8-4                 
+ [21] evaluate_0.20                 cli_3.6.1                    
+ [23] zlibbioc_1.44.0               hwriter_1.3.2.1              
+ [25] rstudioapi_0.14               whisker_0.4.1                
+ [27] bslib_0.4.2                   rpart_4.1.19                 
+ [29] fastmatch_1.1-3               locfdr_1.1-8                 
+ [31] lambda.r_1.2.4                shiny_1.7.4                  
+ [33] xfun_0.38                     cluster_2.1.4                
+ [35] caTools_1.18.2                KEGGREST_1.38.0              
+ [37] interactiveDisplayBase_1.36.0 Biostrings_2.66.0            
+ [39] png_0.1-8                     reshape_0.8.9                
+ [41] withr_2.5.0                   bitops_1.0-7                 
+ [43] plyr_1.8.8                    cellranger_1.1.0             
+ [45] pillar_1.9.0                  gplots_3.1.3                 
+ [47] cachem_1.0.7                  fs_1.6.1                     
+ [49] vctrs_0.6.1                   ellipsis_0.3.2               
+ [51] generics_0.1.3                foreign_0.8-84               
+ [53] munsell_0.5.0                 DelayedArray_0.24.0          
+ [55] fastmap_1.1.1                 compiler_4.2.2               
+ [57] abind_1.4-5                   httpuv_1.6.9                 
+ [59] rtracklayer_1.58.0            plotly_4.10.1                
+ [61] GenomeInfoDbData_1.2.9        lattice_0.20-45              
+ [63] utf8_1.2.3                    later_1.3.0                  
+ [65] Quandl_2.11.0                 jsonlite_1.8.4               
+ [67] GGally_2.1.2                  pbapply_1.7-0                
+ [69] carData_3.0-5                 lazyeval_0.2.2               
+ [71] promises_1.2.0.1              car_3.1-2                    
+ [73] checkmate_2.1.0               rmarkdown_2.21               
+ [75] statmod_1.5.0                 BSgenome_1.66.3              
+ [77] survival_3.5-5                yaml_2.3.7                   
+ [79] systemfonts_1.0.4             htmltools_0.5.5              
+ [81] memoise_2.0.1                 BiocIO_1.8.0                 
+ [83] locfit_1.5-9.7                quadprog_1.5-8               
+ [85] digest_0.6.31                 mime_0.12                    
+ [87] rappdirs_0.3.3                futile.options_1.0.1         
+ [89] RSQLite_2.3.1                 blob_1.2.4                   
+ [91] labeling_0.4.2                splines_4.2.2                
+ [93] Formula_1.2-5                 Rhdf5lib_1.20.0              
+ [95] ProtGenerics_1.30.0           RCurl_1.98-1.12              
+ [97] hms_1.1.3                     rhdf5_2.42.0                 
+ [99] colorspace_2.1-0              base64enc_0.1-3              
+[101] BiocManager_1.30.20           nnet_7.3-18                  
+[103] sass_0.4.5                    Rcpp_1.0.10                  
+[105] fansi_1.0.4                   tzdb_0.3.0                   
+[107] R6_2.5.1                      lifecycle_1.0.3              
+[109] formatR_1.14                  zip_2.2.2                    
+[111] curl_5.0.0                    ggsignif_0.6.4               
+[113] jquerylib_0.1.4               svMisc_1.2.3                 
+[115] Matrix_1.5-3                  htmlwidgets_1.6.2            
+[117] timechange_0.2.0              htmlTable_2.4.1              
+[119] codetools_0.2-19              GO.db_3.16.0                 
+[121] gtools_3.9.4                  getPass_0.2-2                
+[123] prettyunits_1.1.1             SingleCellExperiment_1.20.1  
+[125] gtable_0.3.3                  DBI_1.1.3                    
+[127] git2r_0.31.0                  visdat_0.6.0                 
+[129] httr_1.4.5                    highr_0.10                   
+[131] KernSmooth_2.23-20            vroom_1.6.1                  
+[133] stringi_1.7.12                progress_1.2.2               
+[135] farver_2.1.1                  uuid_1.1-0                   
+[137] hexbin_1.28.3                 xml2_1.3.3                   
+[139] admisc_0.31                   boot_1.3-28.1                
+[141] restfulr_0.0.15               geneplotter_1.76.0           
+[143] BiocVersion_3.16.0            bit_4.0.5                    
+[145] shinycssloaders_1.0.0         pkgconfig_2.0.3              
+[147] babelgene_22.9                rstatix_0.7.2                
+[149] knitr_1.42                   </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
