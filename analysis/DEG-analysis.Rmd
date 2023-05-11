@@ -47,7 +47,7 @@ These filtering steps returned gene-level counts for 10,957 genes.
 
 ```{r}
 # Quality control of genes 
-salmon.files = ("/home/neuro/Documents/neurogenetics/alignments/Illumina/RNAseq/mouse/LJ_LTK/Salmon/GR39m_decoy_aware")
+salmon.files = ("/home/neuro/Documents/NMD_analysis/Analysis/Results/Salmon")
 md.files = "data/LTK_Sample Metafile_V3.txt"
 
 # Loading data
@@ -545,7 +545,7 @@ ggvenn(x[c(1,2)])
 ```
 
 
-When we compare all significant genes in UPF3B KD with UPF3A KD, we can see that there is an overlap of 128 genes. 
+When we compare all significant genes in UPF3B KD with UPF3A KD, we can see that there is an overlap of 144 genes. 
 
 ```{r}
 limma_results %>% 
@@ -558,11 +558,11 @@ limma_results %>%
 ```
 
 
-When we compare the direction of gene expression in these 128 genes, we can see that there is a positive correlation (r = 0.68). 
+When we compare the direction of gene expression in these 144 genes, we can see that there is a positive correlation (r = 0.56). 
 
 We are now interested in seeing which genes are present in each of the quadrants: 
 
-1) Quadrant 1:  Definied as x < 0, y > 0 where is significant genes belogning to UPF3A KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 12 genes belong to this group:
+1) Quadrant 1:  Definied as x < 0, y > 0 where is significant genes belogning to UPF3A KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 14 genes belong to this group:
 
 ```{r}
 limma_results %>% 
@@ -580,7 +580,7 @@ limma_results %>%
                                              c(10,25,50,"All"))))
 ```
 
-2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 102 genes belong to this group. 
+2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 114 genes belong to this group. 
 
 ```{r}
 limma_results %>% 
@@ -618,7 +618,7 @@ limma_results %>%
                                              c(10,25,50,"All"))))
 ```
 
-4) Quadrant 4 is defined as x > 0, y < 0, where significant genes belonging to UPF3B KD group are upregulated and genes belonging to UPF3A KD group are downregulated. Only 2 genes belong in this group. 
+4) Quadrant 4 is defined as x > 0, y < 0, where significant genes belonging to UPF3B KD group are upregulated and genes belonging to UPF3A KD group are downregulated. Only 4 genes belong in this group. 
 
 
 ```{r}
@@ -638,7 +638,7 @@ limma_results %>%
 ```
 
 
-We are also interested in seeing how the 128 overlapping genes between UPF3A and UPF3B KD behave in other conditions. To do this, we will use a heatmap visualisation again.
+We are also interested in seeing how the 144 overlapping genes between UPF3A and UPF3B KD behave in other conditions. To do this, we will use a heatmap visualisation again.
 
 ```{r}
 limma_results %>% 
@@ -695,7 +695,7 @@ limma_results %>%
 ggvenn(x[c(1,3)])
 ```
 
-A total of 309 genes overlap betweeen the Double KDs and UPF3B KD. When we look at the correlation, we see that there is a strong positive correlation. 
+A total of 316 genes overlap betweeen the Double KDs and UPF3B KD. When we look at the correlation, we see that there is a strong positive correlation. 
 
 ```{r}
 limma_results %>% 
@@ -708,7 +708,7 @@ limma_results %>%
 ```
 
 
-1) Quadrant 1:  Definied as x < 0, y > 0 where is significant genes belogning to Double KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 2 genes belong to this group:
+1) Quadrant 1:  Defined as x < 0, y > 0 where is significant genes belonging to Double KD group show upregulation and genes belonging to UPF3B KD group show downregulation. A total of 2 genes belong to this group:
 
 ```{r}
 limma_results %>% 
@@ -724,7 +724,7 @@ limma_results %>%
                            lengthMenu = list(c(10,25,50,-1),
                                              c(10,25,50,"All"))))
 ```
-2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 246 genes belong to this group. 
+2) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 255 genes belong to this group. 
 
 ```{r}
 limma_results %>% 
@@ -743,7 +743,7 @@ limma_results %>%
 
 
 3)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
-61 genes are in this quadrant:
+58 genes are in this quadrant:
 
 ```{r}
 limma_results %>% 
@@ -780,10 +780,10 @@ limma_results %>%
 ```
 
 
-When we compare UPF3B KD with UPF3A OE in UPF3B KD cell lines, we can see there is a strong positive correlation. This correlaiton is very likely induced by the UPF3B KD cell line itself, and not the impact of the UPF3A OE.  For interest, here are the gene in Quadrant 2 and Quadrant 3
+When we compare UPF3B KD with UPF3A OE in UPF3B KD cell lines, we can see there is a strong positive correlation. This correlation is very likely induced by the UPF3B KD cell line itself, and not the impact of the UPF3A OE.  For interest, here are the gene in Quadrant 2 and Quadrant 3
 
 
-1) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 170 genes belong to this group. 
+1) Quadrant 2: Defined as x > 0, y > 0 where significant genes from both conditions show upregulation. 183 genes belong to this group. 
 
 ```{r}
 limma_results %>% 
@@ -801,8 +801,8 @@ limma_results %>%
 ```
 
 
-3)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
-64 genes are in this quadrant:
+2)  Quadrant 3 is defined as x < 0, y < 0 where genes in both groups show downregulation. 
+73 genes are in this quadrant:
 
 ```{r}
 limma_results %>% 
@@ -821,7 +821,7 @@ limma_results %>%
 ```
 
 
-Following up from this, it would be good to see how the genes that were specific to the UPF3B KD (159 genes) and UPF3A OE, UPF3B KD (97) behave relative to the other condition.
+Following up from this, it would be good to see how the genes that were specific to the UPF3B KD (162 genes) and UPF3A OE, UPF3B KD (85) behave relative to the other condition.
 
 
 ```{r}
@@ -928,7 +928,7 @@ DEGenes$UPF3A_OE_vs_Control %>%
                                              c(10,25,50,"All"))))
 ```
 
-```{r fig.height=30}
+```{r fig.height=30, fig.cap ="Heatmap of log2FCof comparisons based on genes significant in UPF3A OE compared to controls"}
 
 rg <- limma_results %>% 
      dplyr::filter(Res.UPF3A_OE_vs_Control != 0) %>%
