@@ -5,12 +5,20 @@ navbar:
   left:
   - text: Home
     href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
-  - text: "Differential Expression Analysis"
-    href: DEG-analysis.html
+  - text: Pre-processing
+    href: Quality-control.html
+  - text: Differential Expression Analysis
+    menu:
+    - text: DEG analysis
+      href: DEG-analysis.html
+    - text: Enrichment analysis using goseq
+      href: Enichment-analysis-goseq.html
+    - text: Enrichment analysis using fgsea
+      href: Enichment-analysis-fgsea.html
+  - text: Transcript Analysis
+    menu:
+    - text: DET analysis
+      href: Differential-transcript-expression.html
   right:
   - icon: fab fa-github
     text: Source code
