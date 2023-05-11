@@ -42,7 +42,7 @@ load("output/DEG-list.Rda")
 Fast Gene Set Enrichment Analysis implements a fast version of the gsea algorithm. As a result, more permutations are made to get more fine grained p-values. 
 
 
-`fgsea` results can be intrepreted as following: 
+`fgsea` results can be interpreted as following: 
 
 - `ES`: Enrichment score which is calculated based on the rank
 - `NES`: Normalized Enrichment Score

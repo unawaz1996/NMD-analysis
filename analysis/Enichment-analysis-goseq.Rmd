@@ -110,6 +110,8 @@ pwf=nullp(genes,bias.data=new_lengthData, plot.fit = FALSE)
 plotPWF(pwf, main = "Bias from gene length")
 
 ```
+
+
 ```{r fig.caption= "UPF3A vs Controls"}
 analysis = limma_results %>% dplyr::select(ensembl_gene_id, contains("UPF3A_vs_Control")) %>% 
   set_colnames( gsub(paste0(".", "UPF3A_vs_Control"), "", colnames(.)))
@@ -126,6 +128,8 @@ pwf=nullp(genes,bias.data=new_lengthData, plot.fit = FALSE)
 plotPWF(pwf, main = "Bias from gene length")
 
 ```
+
+
 ```{r fig.caption= "Double KD vs Controls"}
 analysis = limma_results %>% dplyr::select(ensembl_gene_id, contains("DoubleKD_vs_Control")) %>% 
   set_colnames( gsub(paste0(".", "DoubleKD_vs_Control"), "", colnames(.)))
@@ -246,7 +250,7 @@ genes_of_interest = goplot_data %>%
   #with(structure(logFC, names = genes))
 
 chord= chord_dat(goplot_data, genes_of_interest, processes)
-GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5, ribbon.col = c("#EA2A5F", "#890042", "#FD9675", "#FCC98A", "#F9D236", "#2F124B","#78C5D6"),
+GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5,
         border.size = 0.25)
 
 ```
@@ -294,7 +298,7 @@ genes_of_interest = goplot_data %>%
 
 chord= chord_dat(goplot_data, genes_of_interest, processes)
 GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5, 
-        border.size = 0.25,  ribbon.col = c("#890042", "#FD9675", "#FCC98A", "#2F124B","#78C5D6"))
+        border.size = 0.25)
 
 ```
 
@@ -392,7 +396,7 @@ genes_of_interest = goplot_data %>%
 
 chord= chord_dat(goplot_data, genes_of_interest, processes)
 GOChord(chord, space = 0.02, gene.order = 'logFC', gene.space = 0.25, gene.size = 5, 
-        border.size = 0.25, ribbon.col = c("#FF95C8", "#EA2A5F", "#890042", "#FD9675", "#FCC98A", "#F9D236","#6E74B4", "#2F124B","#78C5D6"))
+        border.size = 0.25)
 
 ```
 
@@ -413,7 +417,7 @@ do.call(rbind, gene_ontologies[-3]) %>%
 
 ```{r}
 c2_res = list()
-for (c in comparisons){
+for (c in comparisons[-3]){
     analysis = limma_results %>% dplyr::select(ensembl_gene_id, contains(c)) 
     colnames(analysis) = gsub(paste0(".", c), "", colnames(analysis))
     genes = as.integer(analysis$Res == 1  | analysis$Res == -1)
@@ -485,21 +489,21 @@ c2_res$DoubleKD_vs_Control %>%
 
 4. UPF3A OE vs Controls
 
-```{r}
-c2_res$UPF3A_OE_vs_Control %>% 
-   dplyr::select(-c(Comparison, Sig_adjP, Sig_FDR, under_represented_pvalue)) %>%
- DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
-               caption ="Significant enriched terms in UPF3A OE compared to controls",
-               style = "auto", width = NULL, height = NULL, elementId = NULL,
-            options = list(scrollX = TRUE, 
-                           scrollCollapse = TRUE, 
-                           pageLength = 5, autoWidth = TRUE, 
-                           dom = 'Blfrtip',
-                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
-                           lengthMenu = list(c(10,25,50,-1),
-                                             c(10,25,50,"All"))))
-
-```
+<!-- # ```{r} -->
+<!-- # c2_res$UPF3A_OE_vs_Control %>%  -->
+<!-- #    dplyr::select(-c(Comparison, Sig_adjP, Sig_FDR, under_represented_pvalue)) %>% -->
+<!-- #  DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), -->
+<!-- #                caption ="Significant enriched terms in UPF3A OE compared to controls", -->
+<!-- #                style = "auto", width = NULL, height = NULL, elementId = NULL, -->
+<!-- #             options = list(scrollX = TRUE,  -->
+<!-- #                            scrollCollapse = TRUE,  -->
+<!-- #                            pageLength = 5, autoWidth = TRUE,  -->
+<!-- #                            dom = 'Blfrtip', -->
+<!-- #                            buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'), -->
+<!-- #                            lengthMenu = list(c(10,25,50,-1), -->
+<!-- #                                              c(10,25,50,"All")))) -->
+<!-- #  -->
+<!-- # ``` -->
 
 5. UPF3A OE UPF3B KD vs Controls
 
@@ -525,7 +529,7 @@ c2_res$UPF3A_OE_UPF3B_KD_vs_Control %>%
 c2_enrich = list("UPF3B KD" = c2_res$UPF3B_vs_Control$id, 
                 "UPF3A KD" = c2_res$UPF3A_vs_Control$id, 
                 "Double KD" = c2_res$DoubleKD_vs_Control$id, 
-                "UPF3A OE" = c2_res$UPF3A_OE_vs_Control$id, 
+               # "UPF3A OE" = c2_res$UPF3A_OE_vs_Control$id, 
                 "UPF3A OE, UPF3B KD" = c2_res$UPF3A_OE_UPF3B_KD_vs_Control$id)
 ```
 
@@ -564,7 +568,7 @@ do.call(rbind, c2_res) %>%
 
 ```{r}
 h_enrichment =  list()
-for (c in comparisons){
+for (c in comparisons[-3]){
     
     analysis = limma_results %>% dplyr::select(ensembl_gene_id, contains(c)) 
     colnames(analysis) = gsub(paste0(".", c), "", colnames(analysis))
@@ -639,22 +643,22 @@ h_enrichment$DoubleKD_vs_Control %>%
 
 4. UPF3A OE vs Controls 
 
-```{r}
-h_enrichment$UPF3A_OE_vs_Control %>% 
-   dplyr::select(-c(Comparison, Sig_adjP, Sig_FDR, under_represented_pvalue)) %>%
- DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
-               caption ="Significant enriched terms in the hallmark gene sets for DE genes in UPF3A OE compared to controls",
-               style = "auto", width = NULL, height = NULL, elementId = NULL,
-            options = list(scrollX = TRUE, 
-                           scrollCollapse = TRUE, 
-                           pageLength = 5, autoWidth = TRUE, 
-                           dom = 'Blfrtip',
-                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
-                           lengthMenu = list(c(10,25,50,-1),
-                                             c(10,25,50,"All"))))
-
-
-```
+<!-- # ```{r} -->
+<!-- # h_enrichment$UPF3A_OE_vs_Control %>%  -->
+<!-- #    dplyr::select(-c(Comparison, Sig_adjP, Sig_FDR, under_represented_pvalue)) %>% -->
+<!-- #  DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), -->
+<!-- #                caption ="Significant enriched terms in the hallmark gene sets for DE genes in UPF3A OE compared to controls", -->
+<!-- #                style = "auto", width = NULL, height = NULL, elementId = NULL, -->
+<!-- #             options = list(scrollX = TRUE,  -->
+<!-- #                            scrollCollapse = TRUE,  -->
+<!-- #                            pageLength = 5, autoWidth = TRUE,  -->
+<!-- #                            dom = 'Blfrtip', -->
+<!-- #                            buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'), -->
+<!-- #                            lengthMenu = list(c(10,25,50,-1), -->
+<!-- #                                              c(10,25,50,"All")))) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # ``` -->
 
 5. UPF3A OE vs Controls 
 
@@ -684,7 +688,7 @@ h_enrichment$UPF3A_OE_UPF3B_KD_vs_Control %>%
 h_enrich = list("UPF3B KD" = h_enrichment$UPF3B_vs_Control$id, 
                 "UPF3A KD" = h_enrichment$UPF3A_vs_Control$id, 
                 "Double KD" = h_enrichment$DoubleKD_vs_Control$id, 
-                "UPF3A OE" = h_enrichment$UPF3A_OE_vs_Control$id, 
+               # "UPF3A OE" = h_enrichment$UPF3A_OE_vs_Control$id, 
                 "UPF3A OE, UPF3B KD" = h_enrichment$UPF3A_OE_UPF3B_KD_vs_Control$id)
 ```
 
@@ -700,4 +704,81 @@ do.call(rbind, h_enrichment) %>%
     ggplot(aes(x = over_represented_pvalue, y = id, size = numDEInCat)) + 
      labs(x = 'Over-represented Pvalue', y = "")+
         geom_point(alpha=0.7, shape=21, color="black")  + theme_bw() + theme(axis.text.y = element_text( hjust=1, face = "bold")) +       labs(fill = "Gene Ontology") + facet_grid(rows = vars(Comparison), scales ="free_y")
+```
+
+
+### Shared transcripts between the KDs 
+
+```{r}
+
+analysis = limma_results
+genes = as.integer(analysis$Res.UPF3B_vs_Control != 0 & analysis$Res.UPF3A_vs_Control !=0)
+not_na = !is.na(genes)
+names(genes) = analysis$ensembl_gene_id
+genes = genes[not_na]
+gene_ont = get_ontologies(genes = genes)
+```
+
+```{r}
+gene_ont$Genes = sapply(gene_ont$EnsemblID, function(x){
+            tmp = strsplit(as.character(x), ",") %>% unlist()
+            tmp %<>% as.data.frame() %>% mutate_if(is.character, str_trim)
+            tmp = tmp[[1]]
+            tmp = mapIds(org.Mm.eg.db, keys=tmp,  column="SYMBOL",keytype="ENSEMBL", multiVals="first") %>% 
+                unname
+            return(tmp)
+        })
+
+gene_ont$Genes = vapply(gene_ont$Genes, paste, collapse = ", ", character(1L))
+
+gene_ont %>% 
+    dplyr::select(-c( contains("Sig"), EnsemblID, shortest_path, longest_path, terminal_node)) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant gene ontology terms in the 144 shared genes between UFP3A KD and UPF3B KD",
+               style = "auto", width = NULL, height = NULL, elementId = NULL,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+
+
+```{r}
+c2_pathway = get_ontologies(genes = genes, pathway = c2)
+
+c2_pathway %>% 
+    dplyr::select(-c( contains("Sig"))) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant C2 terms in the 144 shared genes between UFP3A KD and UPF3B KD",
+               style = "auto", width = NULL, height = NULL, elementId = NULL,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
+```
+
+```{r}
+mH_res = get_ontologies(genes = genes, pathway = mH)
+```
+
+```{r}
+mH_res %>% 
+    dplyr::select(-c( contains("Sig"))) %>%
+ DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'),
+               caption ="Significant Hallmark terms in theshared genes between UFP3A KD and UPF3B KD",
+               style = "auto", width = NULL, height = NULL, elementId = NULL,
+            options = list(scrollX = TRUE, 
+                           scrollCollapse = TRUE, 
+                           pageLength = 5, autoWidth = TRUE, 
+                           dom = 'Blfrtip',
+                           buttons = c('copy', 'csv', 'excel', 'pdf', 'colvis'),
+                           lengthMenu = list(c(10,25,50,-1),
+                                             c(10,25,50,"All"))))
 ```
