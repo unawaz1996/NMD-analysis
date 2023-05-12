@@ -1034,6 +1034,37 @@ upf3a_oe_kd_volc = limma_results %>%
 upf3a_oe_kd_volc
 ```
 
+# Siginifcant genes across all conditions with respect to other conditions 
+
+```{r fig.height = 10, fig.width=10, fig.cap="*Heatmap of log fold changes across different comparisons for genes that were significant in at least 1 pairwise comparison aganst controls*"}
+
+rg <- limma_results %>% 
+     dplyr::filter(Res.UPF3B_vs_Control != 0 | Res.UPF3A_vs_Control != 0 |
+                Res.DoubleKD_vs_Control !=0 | Res.UPF3A_OE_vs_Control != 0 |
+                  Res.UPF3A_OE_UPF3B_KD_vs_Control != 0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>% max(abs(.));
+
+limma_results %>%
+  dplyr::filter(Res.UPF3B_vs_Control != 0 | Res.UPF3A_vs_Control != 0 |
+                Res.DoubleKD_vs_Control !=0 | Res.UPF3A_OE_vs_Control != 0 |
+                  Res.UPF3A_OE_UPF3B_KD_vs_Control != 0 ) %>% 
+  dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene") %>%
+    pheatmap(,
+       # scale="row", 
+        cluster_cols = TRUE,
+        breaks = seq(-rg, rg, length.out = 100),
+        clustering_distance_rows = "euclidean", 
+        border_color = "white", 
+        treeheight_row = 0,
+        cutree_rows = 2,
+        fontsize = 6,
+        color = colorRampPalette(c("#2F124B", "#6E74B4","#F9F9F9", "#FD9675", "#EA2A5F"))(100),
+        labels_row = row.names(.)
+    )
+  
+```
 # Data export
 ```{r}
 save(DEGenes, file=here::here("output/DEG-list.Rda"))
