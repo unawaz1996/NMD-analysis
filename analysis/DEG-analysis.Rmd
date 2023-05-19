@@ -374,7 +374,8 @@ ratios_fig =ratios  %>%
                                                             "UPF3B_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
                                                             "UPF3A_OE_UPF3B_KD_vs_Control" = "UPF3A OE UPF3B KD"))
 
-ratios
+
+ratios_fig
 #ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/ratio_DEG.svg", plot = #ratios_fig, 
 #       units = c("in"), height = 3.30, width = 4.48)
 
