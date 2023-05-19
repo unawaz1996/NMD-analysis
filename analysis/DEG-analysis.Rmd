@@ -16,7 +16,7 @@ editor_options:
 knitr::opts_chunk$set(
     autodep = TRUE,
     eval = TRUE,
-	echo = FALSE,
+	echo = TRUE,
 	warning = FALSE,
 	message = FALSE
 )
