@@ -29,6 +29,7 @@ source("code/libraries.R")
 library(biomaRt)
 library(nVennR)
 library(eulerr)
+library(ggsci)
 ```
 
 
@@ -313,23 +314,31 @@ summary(results)
 
 ```{r fig.height=4}
 summary_DEG = summary(results) %>% melt() %>% 
-    dplyr::filter(Var1 != "NotSig") %>% 
-    ggplot(aes(x=reorder(Var2, -value), y = value, fill=Var1)) + 
+    dplyr::filter(Var1 != "NotSig") 
+
+summary_DEG$Var1 = factor(summary_DEG$Var1, levels = c("Up", "Down"))
+summary_DEG$Var2 = factor(summary_DEG$Var2, levels = c("UPF3B_vs_Control", 
+                                                       "UPF3A_vs_Control", 
+                                                       "DoubleKD_vs_Control", 
+                                                       "UPF3A_OE_vs_Control", 
+                                                       "UPF3A_OE_UPF3B_KD_vs_Contro"))
+summary_DEG = summary_DEG %>%  
+    ggplot(aes(x=Var2, y = value, fill=Var1)) + 
     geom_bar(stat = "identity",   colour = "white", width = .75) + 
     theme_bw() + 
-    theme(axis.text.x = element_text(angle = 70,  hjust=1, face = "bold"), 
+    theme(axis.text.x = element_text(angle = 70,  hjust=1, face = "bold", size=10), 
           legend.position = "bottom", 
           legend.title= element_blank(), axis.title.y = element_text(size = 12), 
           axis.text.y = element_text(size = 12, face = "bold")) + 
-    scale_fill_manual(values = c( "#2F124B","#EA2A5F")) +
+    scale_fill_manual(values = c("#EA2A5F", "#2F124B")) +
     ylab("# Differentially expressed genes") + xlab("") + scale_x_discrete(labels=c("DoubleKD_vs_Control" = "Double KD", "UPF3A_vs_Control" = "UPF3A KD", 
                                                             "UPF3B_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
                                                             "UPF3A_OE_UPF3B_KD_vs_Control" = "UPF3A OE UPF3B KD"))
 
-summary_DEG
 
-#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/total_DEG.svg", plot = summary_DEG, 
-#       units = c("in"), height = 5.54, width = 5.69)
+summary_DEG
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/total_DEG.svg", plot = #summary_DEG, 
+#       units = c("in"), height = 5.31, width = 4.48)
 
 ```
 
@@ -345,9 +354,14 @@ for (c in comparisons){
            ratio = ratio)
   ratios = rbind(ratios, ratio)
   }
-ratios
 
-ratios  %>%
+ratios$Comparisons = factor(ratios$Comparisons, levels = c("UPF3B_vs_Control", 
+                                                           "UPF3A_vs_Control", 
+                                                           "DoubleKD_vs_Control", 
+                                                           "UPF3A_OE_vs_Control", 
+                                                           "UPF3A_OE_UPF3B_KD_vs_Control"))
+
+ratios_fig =ratios  %>%
   ggplot(aes(x =Comparisons, y = ratio, fill = Comparisons)) + 
   geom_bar(stat = "identity",   colour = "white", width = .75) + 
     theme_classic() + 
@@ -355,12 +369,14 @@ ratios  %>%
           legend.position = "none", 
           legend.title= element_blank(), axis.title.y = element_text(size = 12), 
           axis.text.y = element_text(size = 14, face = "bold")) + 
-    scale_fill_manual(values = c("#E12F8F","#6E74B4","#EA2A5F", "#FD9675", "#2F124B")) +
-    ylab("ratio up/down") + xlab("") 
+    scale_fill_manual(values = c("#2F124B","#EA2A5F","#6E74B4","#E12F8F", "#FD9675")) +
+    ylab("ratio up/down") + xlab("") + scale_x_discrete(labels=c("DoubleKD_vs_Control" = "Double KD", "UPF3A_vs_Control" = "UPF3A KD", 
+                                                            "UPF3B_vs_Control" = "UPF3B KD", "UPF3A_OE_vs_Control" = "UPF3A OE", 
+                                                            "UPF3A_OE_UPF3B_KD_vs_Control" = "UPF3A OE UPF3B KD"))
 
-
-#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/ratio_DEG.svg", plot = ratios, 
-#       units = c("in"), height = 4, width = 5.69)
+ratios
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/ratio_DEG.svg", plot = #ratios_fig, 
+#       units = c("in"), height = 3.30, width = 4.48)
 
 ```
 
@@ -451,7 +467,8 @@ DEGenes$UPF3B_vs_Control %>%
 limma_results %>% 
     dplyr::select(ensembl_gene_id,gene,entrez, contains("UPF3B_vs")) %>% 
     dplyr::select(-contains("Res")) %>% 
-    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%     DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls", style = "auto", width = NULL, height = NULL, elementId = NULL,
+    mutate(genename = mapIds(org.Mm.eg.db, keys=ensembl_gene_id,  column="GENENAME",keytype="ENSEMBL", multiVals="first")) %>%    
+  DT::datatable(filter = 'top', extensions = c('Buttons', 'FixedColumns'), caption = "Genes significantly expressed in UPF3B KD relative to Controls", style = "auto", width = NULL, height = NULL, elementId = NULL,
             options = list(scrollX = TRUE, 
                            scrollCollapse = TRUE, 
                            pageLength = 5, autoWidth = TRUE, 
@@ -520,6 +537,18 @@ limma_results %>%
     
 ```
 
+#### UPF2 levels 
+
+```{r}
+limma_results %>% 
+  dplyr::filter(ensembl_gene_id == "ENSMUSG00000038398") %>% 
+  column_to_rownames("ensembl_gene_id") %>% 
+  dplyr::select(contains("Coef.")) %>%
+  melt() %>% 
+  ggplot(aes(x=variable, y=value)) + geom_bar(stat="identity")
+
+
+```
 
 ### Overlap with other significant genes 
 
@@ -541,20 +570,34 @@ x = list( "UPF3B KD" = DEGenes$UPF3B_vs_Control$ensembl_gene_id,
     "UPF3A OE" = DEGenes$UPF3A_OE_vs_Control$ensembl_gene_id, 
     "UPF3A OE UPF3B KD" = DEGenes$UPF3A_OE_UPF3B_KD_vs_Control$ensembl_gene_id)
 
-ggvenn(x[c(1,2)])
+venn_upf3 = ggvenn(x[c(1,2)], fill_color = c("#2F124B", "#EA2A5F"),
+       set_name_color = "black", text_color = "white", text_size = 6, 
+       stroke_size = 0.5, fill_alpha = 0.6) 
+
+venn_upf3
+#ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/UPF3_venn.svg", plot = #venn_upf3 , 
+#       units = c("in"), height = 3.30, width = 4.48)
+
 ```
 
 
 When we compare all significant genes in UPF3B KD with UPF3A KD, we can see that there is an overlap of 144 genes. 
 
 ```{r}
-limma_results %>% 
+cor_upf3KD = limma_results %>% 
     dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>% 
     ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_vs_Control", 
               cor.coef = TRUE, add = "reg.line", 
               conf.int = TRUE, add.params = list(color = "blue",
                                                  fill = "lightgray")) + 
-    theme_bw() + ylab("UPF3A KD (log2FoldChange)") + xlab("UPF3B KD (log2FoldChange)")
+    theme_bw() + ylab("UPF3A KD (log2FoldChange)") + xlab("UPF3B KD (log2FoldChange)") +
+  geom_hline(yintercept = 0, size = 0.5,lty = "dashed", color = "grey60") +
+  geom_vline(xintercept = 0, size = 0.5, lty = "dashed", color = "grey60")
+
+ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/UPF3_corr.svg", plot = cor_upf3KD, 
+       units = c("in"), height = 3.80, width = 4.73)
+
+
 ```
 
 
@@ -685,6 +728,75 @@ limma_results %>%
         cellwidth = 12
     )
 
+
+```
+
+```{r}
+
+library(ComplexHeatmap)
+library(circlize)
+
+```
+
+```{r}
+heatmap = limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control !=0) %>%
+    dplyr::select(contains("Coef"), gene)  %>%
+    column_to_rownames("gene")
+
+split = sample(letters[1:5], 144, replace = TRUE)
+split = factor(split, levels = letters[1:5])
+
+col_fun1 = colorRamp2(c(-6, 0, 6), c("#2F124B", "#F9F9F9","#EA2A5F"))
+color = colorRampPalette(c("#2F124B", "#6E74B4","#F9F9F9", "#FD9675", "#EA2A5F"))(100)
+
+circos.par(gap.after = c(2, 2, 2, 2, 10))
+circos.heatmap(heatmap ,col = col_fun1, split = split, rownames.side = "outside")
+circos.track(track.index = get.current.track.index(), panel.fun = function(x, y) {
+    if(CELL_META$sector.numeric.index == 5) { # the last sector
+        cn = colnames(heatmap)
+        n = length(cn)
+        circos.text(rep(CELL_META$cell.xlim[2], n) + convert_x(1, "mm"), 
+            1:n - 0.5, cn, 
+            cex = 0.5, adj = c(0, 0.5,0), facing = "inside")
+    }
+}, bg.border = NA)
+
+
+```
+
+
+We also want to see the genes that are unique to UPF3A KD and unique to UPF3B KD and how their expression is
+
+```{r}
+upf3b_uniq = limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control != 0 & Res.UPF3A_vs_Control ==0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() + ylab("UPF3A KD (log2FoldChange)") + xlab("UPF3B KD (log2FoldChange)") +
+  geom_hline(yintercept = 0, size = 0.5,lty = "dashed", color = "grey60") +
+  geom_vline(xintercept = 0, size = 0.5, lty = "dashed", color = "grey60")
+
+
+ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/UPF3B_corr.svg", plot = upf3b_uniq, 
+       units = c("in"), height = 3.80, width = 4.73)
+```
+
+```{r}
+upf3a_uniq = limma_results %>% 
+    dplyr::filter(Res.UPF3B_vs_Control == 0 & Res.UPF3A_vs_Control !=0) %>% 
+    ggscatter(., x= "Coef.UPF3B_vs_Control", y="Coef.UPF3A_vs_Control", 
+              cor.coef = TRUE, add = "reg.line", 
+              conf.int = TRUE, add.params = list(color = "blue",
+                                                 fill = "lightgray")) + 
+    theme_bw() + ylab("UPF3A KD (log2FoldChange)") + xlab("UPF3B KD (log2FoldChange)") +
+  geom_hline(yintercept = 0, size = 0.5,lty = "dashed", color = "grey60") +
+  geom_vline(xintercept = 0, size = 0.5, lty = "dashed", color = "grey60")
+
+ggsave(filename = "/home/neuro/Documents/NMD_analysis/Analysis/NMD-analysis/output/DEG/Thesis_figures/UPF3A_corr.svg", plot = upf3a_uniq, 
+       units = c("in"), height = 3.80, width = 4.73)
 
 ```
 
