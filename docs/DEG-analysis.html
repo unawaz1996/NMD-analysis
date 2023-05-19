@@ -667,15 +667,15 @@ output/DEG/Thesis_figures/UPF3A_corr.svg
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreee526ece071747bc0bfe184090f90287b25e853actargetblanke526ecea">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreee1af73faa5541e468468be8af91bb1d7bcaa6491targetblanke1af73fa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/e526ece071747bc0bfe184090f90287b25e853ac" target="_blank">e526ece</a>
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/e1af73faa5541e468468be8af91bb1d7bcaa6491" target="_blank">e1af73f</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreee526ece071747bc0bfe184090f90287b25e853actargetblanke526ecea"
+id="strongRepositoryversionstrongahrefhttpsgithubcomunawaz1996NMDanalysistreee1af73faa5541e468468be8af91bb1d7bcaa6491targetblanke1af73fa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -685,7 +685,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/unawaz1996/NMD-analysis/tree/e526ece071747bc0bfe184090f90287b25e853ac" target="_blank">e526ece</a>.
+<a href="https://github.com/unawaz1996/NMD-analysis/tree/e1af73faa5541e468468be8af91bb1d7bcaa6491" target="_blank">e1af73f</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -791,6 +791,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/unawaz1996/NMD-analysis/blob/e1af73faa5541e468468be8af91bb1d7bcaa6491/analysis/DEG-analysis.Rmd" target="_blank">e1af73f</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-05-19
+</td>
+<td>
+wflow_publish(c("analysis/index.Rmd", "analysis/DEG-analysis.Rmd"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/unawaz1996/NMD-analysis/c6d0d1410c54f5bddff8dc738a298c72cd03abe2/docs/DEG-analysis.html" target="_blank">c6d0d14</a>
+</td>
+<td>
+unawaz1996
+</td>
+<td>
+2023-05-19
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -3189,7 +3223,8 @@ id="siginifcant-genes-across-all-conditions-with-respect-to-other-conditions"
 class="section level1">
 <h1>Siginifcant genes across all conditions with respect to other
 conditions</h1>
-<pre class="r"><code>rg &lt;- limma_results %&gt;% 
+<pre class="r"><code>circos.clear()
+rg &lt;- limma_results %&gt;% 
      dplyr::filter(Res.UPF3B_vs_Control != 0 | Res.UPF3A_vs_Control != 0 |
                 Res.DoubleKD_vs_Control !=0 | Res.UPF3A_OE_vs_Control != 0 |
                   Res.UPF3A_OE_UPF3B_KD_vs_Control != 0) %&gt;%
@@ -3215,7 +3250,7 @@ limma_results %&gt;%
         labels_row = row.names(.)
     )</code></pre>
 <div class="figure" style="text-align: center">
-<img src="figure/DEG-analysis.Rmd/unnamed-chunk-63-1.png" alt="*Heatmap of log fold changes across different comparisons for genes that were significant in at least 1 pairwise comparison aganst controls*" width="960" />
+<img src="figure/DEG-analysis.Rmd/unnamed-chunk-63-1.png" alt="*Heatmap of log fold changes across different comparisons for genes that were significant in at least 1 pairwise comparison aganst controls*" width="1920" />
 <p class="caption">
 <em>Heatmap of log fold changes across different comparisons for genes
 that were significant in at least 1 pairwise comparison aganst
